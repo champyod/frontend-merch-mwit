@@ -1,268 +1,135 @@
 "use client";
 
-import TextLoader from "@/components/ui/TextLoader";
-import { isValidUrl } from "@/lib/helpers";
-import { Preorder } from "@/types/types";
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
 import { toast } from "sonner";
+import { Download, CheckCircle, Package, User, Clock, ExternalLink, Loader2 } from "lucide-react";
+import { LiquidButton } from "@/components/ui/LiquidButton";
+import { LiquidCard } from "@/components/ui/LiquidCard";
+import { Preorder } from "@/types/types";
 
 interface GetPreordersResponse {
 	payload?: Preorder[];
 }
 
-const formatHref = ({ title, itemId }: { title: string; itemId: number }) =>
-	"/shop/" + title.replaceAll(" ", "-") + "-" + itemId;
-
 export default function PreordersPage() {
-	const { data, refetch } = useQuery<any, any, GetPreordersResponse, any>({
+	const { data, refetch, isLoading } = useQuery<any, any, GetPreordersResponse, any>({
 		queryKey: ["preorders"],
 		queryFn: async () => {
-			const res = await fetch("/api/preorder");
-			const data = await res.json();
-			return data;
+			const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/admin/preorders`, {
+				headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
+			});
+			return await res.json();
 		},
 	});
 
-	if (!data)
-		return (
-			<>
-				<h1 className="text-3xl font-bold">Preorders</h1>
-				<div className="pt-10 text-lg">
-					<TextLoader loadingText="Loading" />
-				</div>
-			</>
-		);
+	const handleExport = () => {
+		const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/admin/preorders/export`;
+		window.open(url, "_blank");
+	};
 
-	const notCompletedPreorders = data.payload
-		? data.payload?.filter((preorder) => preorder.completed === 0)
-		: [];
-	const completedPreorders = data.payload
-		? data.payload?.filter((preorder) => preorder.completed === 1)
-		: [];
-
-	const markCompleted = async ({
-		preorderId,
-		title,
-	}: {
-		preorderId: number;
-		title: string;
-	}) => {
+	const markCompleted = async (id: number) => {
 		try {
-			if (!confirm(`Are you sure to mark order ${title} as completed?`))
-				return;
-
-			const data = await (
-				await fetch(`/api/preorder/complete/${preorderId}`, {
-					method: "PUT",
-				})
-			).json();
-			if (data.hasError) throw new Error(data.errorMessage);
-
-			toast.success("Marked preorder as completed successfully");
+			const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/admin/preorders/${id}/complete`, {
+				method: "PUT",
+				headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
+			});
+			if (!res.ok) throw new Error("Failed");
+			toast.success("Order marked as completed");
 			refetch();
-		} catch (error: any) {
-			toast.error(error.message || "Error marking preorder as completed");
+		} catch (e) {
+			toast.error("Update failed");
 		}
 	};
 
+	const preorders = data?.payload || [];
+	const pending = preorders.filter(p => p.completed === 0);
+	const completed = preorders.filter(p => p.completed === 1);
+
 	return (
-		<>
-			<h1 className="text-3xl font-bold">Preorders</h1>
-			<p className="pb-5 pt-1 text-slate-700">Newest to Oldest</p>
-
-			<div className="overflow-auto max-w-full h-[60vh]">
-				<table className="border-2 border-black sm:w-full w-screen">
-					<thead className="font-bold bg-slate-200 sticky top-0 border-2 border-black">
-						<tr className="text-center">
-							<td className="p-2">Mark as completed</td>
-							<td className="p-2">Product</td>
-							<td className="p-2">Customer</td>
-							<td className="p-2">Social</td>
-							<td className="p-2">Color</td>
-							<td className="p-2">Size</td>
-							<td className="p-2">Created at</td>
-						</tr>
-					</thead>
-
-					<tbody>
-						{notCompletedPreorders.length === 0 && (
-							<tr className="bg-white text-center">
-								<td className="p-2 text-slate-700" colSpan={7}>
-									There are no preorders yet.
-								</td>
-							</tr>
-						)}
-						{notCompletedPreorders.map((preorder, index) => (
-							<tr
-								key={index}
-								className="bg-white border-2 border-black text-center"
-							>
-								<td className="p-2 whitespace-nowrap w-[100px] border-r-2 border-black">
-									<button
-										type="button"
-										aria-label="Mark preorder as completed"
-										onClick={() =>
-											markCompleted({
-												preorderId: preorder.id,
-												title: preorder.title,
-											})
-										}
-									>
-										<svg
-											className="text-slate-600 hover:text-green-600"
-											xmlns="http://www.w3.org/2000/svg"
-											width="30"
-											height="30"
-											viewBox="0 0 2048 2048"
-										>
-											<path
-												fill="currentColor"
-												d="M1024 0q141 0 272 36t244 104t207 160t161 207t103 245t37 272q0 141-36 272t-104 244t-160 207t-207 161t-245 103t-272 37q-141 0-272-36t-244-104t-207-160t-161-207t-103-245t-37-272q0-141 36-272t104-244t160-207t207-161T752 37t272-37m603 685l-136-136l-659 659l-275-275l-136 136l411 411z"
-											/>
-										</svg>
-									</button>
-								</td>
-
-								<td className="p-2 flex flex-wrap justify-center items-center border-r-2 border-black">
-									<Link
-										target="_blank"
-										href={formatHref({
-											title: preorder.title,
-											itemId: preorder.item_id,
-										})}
-										className="font-bold pb-3 underline"
-									>
-										{preorder.title}
-									</Link>
-									{/* eslint-disable */}
-									<img
-										className="rounded-lg"
-										src={preorder.image_url}
-										alt={preorder.title}
-										width={100}
-										height={100}
-									/>
-								</td>
-								<td className="p-2 whitespace-nowrap w-[100px] border-r-2 border-black">
-									{preorder.customer_name}
-								</td>
-								<td className="p-2 whitespace-nowrap w-[100px] border-r-2 border-black">
-									{isValidUrl(preorder.social) ? (
-										<a
-											target="_blank"
-											rel="noopener noreferrer"
-											href={preorder.social}
-											className="underline font-bold"
-										>
-											{new URL(preorder.social).hostname}
-										</a>
-									) : (
-										preorder.social
-									)}
-								</td>
-								<td className="p-2 whitespace-nowrap w-[100px] border-r-2 border-black">
-									{preorder.color || "n/a"}
-								</td>
-								<td className="p-2 whitespace-nowrap w-[100px] border-r-2 border-black">
-									{preorder.size}
-								</td>
-								<td className="p-2 whitespace-nowrap w-[100px] border-r-2 border-black">
-									{new Date(
-										preorder.created_at
-									).toLocaleString()}
-								</td>
-							</tr>
-						))}
-					</tbody>
-				</table>
+		<div className="p-6 space-y-8 pb-20">
+			<div className="flex justify-between items-end">
+				<div className="space-y-2">
+					<h1 className="text-3xl font-bold text-white">Preorders Dashboard</h1>
+					<p className="text-slate-400">Track and manage all customer orders.</p>
+				</div>
+				<LiquidButton variant="outline" onClick={handleExport} className="flex items-center gap-2">
+					<Download className="w-4 h-4" /> Export CSV Report
+				</LiquidButton>
 			</div>
 
-			<h2 className="pt-10 text-2xl font-bold">Completed preorders</h2>
-			<p className="pb-5 text-sm pt-1 text-slate-700">Newest to Oldest</p>
-			<CompletedPreordersTable preorders={completedPreorders} />
-		</>
+			<div className="space-y-6">
+				<h2 className="text-xl font-bold text-emerald-500 flex items-center gap-2">
+					<Clock className="w-5 h-5" /> Pending Fulfillment ({pending.length})
+				</h2>
+				
+				{isLoading ? (
+					<div className="flex justify-center p-20"><Loader2 className="w-10 h-10 animate-spin text-emerald-500" /></div>
+				) : pending.length === 0 ? (
+					<LiquidCard className="p-12 text-center text-slate-500">No pending orders.</LiquidCard>
+				) : (
+					<div className="grid grid-cols-1 gap-4">
+						{pending.map(p => (
+							<OrderCard key={p.id} preorder={p} onComplete={() => markCompleted(p.id)} />
+						))}
+					</div>
+				)}
+			</div>
+
+			{completed.length > 0 && (
+				<div className="space-y-6 pt-10">
+					<h2 className="text-xl font-bold text-slate-400 flex items-center gap-2">
+						<CheckCircle className="w-5 h-5" /> Completed Orders ({completed.length})
+					</h2>
+					<div className="grid grid-cols-1 gap-4 opacity-60">
+						{completed.map(p => (
+							<OrderCard key={p.id} preorder={p} isCompleted />
+						))}
+					</div>
+				</div>
+			)}
+		</div>
 	);
 }
 
-function CompletedPreordersTable({ preorders }: { preorders: Preorder[] }) {
+function OrderCard({ preorder, onComplete, isCompleted }: { preorder: Preorder, onComplete?: () => void, isCompleted?: boolean }) {
 	return (
-		<div className="overflow-auto max-w-full h-[60vh]">
-			<table className="border-2 border-black sm:w-full w-screen">
-				<thead className="font-bold bg-slate-200 sticky top-0 border-2 border-black">
-					<tr className="text-center">
-						<td className="p-2">Product</td>
-						<td className="p-2">Customer</td>
-						<td className="p-2">Social</td>
-						<td className="p-2">Color</td>
-						<td className="p-2">Size</td>
-						<td className="p-2">Created at</td>
-					</tr>
-				</thead>
-
-				<tbody>
-					{(!preorders || preorders?.length === 0) && (
-						<tr className="bg-white text-center">
-							<td className="p-2 text-slate-700" colSpan={7}>
-								There are no completed preorders yet.
-							</td>
-						</tr>
+		<LiquidCard className={`p-5 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between ${isCompleted ? 'border-white/5' : 'border-emerald-500/20'}`}>
+			<div className="flex items-center gap-4 min-w-[250px]">
+				<div className="w-16 h-16 rounded-xl overflow-hidden bg-white/5 flex-shrink-0">
+					{preorder.image_url ? (
+						<img src={preorder.image_url} alt="" className="w-full h-full object-cover" />
+					) : (
+						<div className="w-full h-full flex items-center justify-center text-slate-700"><Package /></div>
 					)}
-					{preorders?.map((preorder, index) => (
-						<tr
-							key={index}
-							className="bg-green-50 border-2 border-black text-center"
-						>
-							<td className="p-2 flex flex-wrap justify-center items-center border-r-2 border-black">
-								<Link
-									target="_blank"
-									href={formatHref({
-										title: preorder.title,
-										itemId: preorder.item_id,
-									})}
-									className="font-bold pb-3 underline"
-								>
-									{preorder.title}
-								</Link>
-								{/* eslint-disable */}
-								<img
-									className="rounded-lg"
-									src={preorder.image_url}
-									alt={preorder.title}
-									width={100}
-									height={100}
-								/>
-							</td>
-							<td className="p-2 whitespace-nowrap w-[100px] border-r-2 border-black">
-								{preorder.customer_name}
-							</td>
-							<td className="p-2 whitespace-nowrap w-[100px] border-r-2 border-black">
-								{isValidUrl(preorder.social) ? (
-									<a
-										href={preorder.social}
-										rel="noopener noreferrer"
-										target="_blank"
-										className="underline font-bold"
-									>
-										{new URL(preorder.social).hostname}
-									</a>
-								) : (
-									preorder.social
-								)}
-							</td>
-							<td className="p-2 whitespace-nowrap w-[100px] border-r-2 border-black">
-								{preorder.color || "n/a"}
-							</td>
-							<td className="p-2 whitespace-nowrap w-[100px] border-r-2 border-black">
-								{preorder.size}
-							</td>
-							<td className="p-2 whitespace-nowrap w-[100px] border-r-2 border-black">
-								{new Date(preorder.created_at).toLocaleString()}
-							</td>
-						</tr>
-					))}
-				</tbody>
-			</table>
-		</div>
+				</div>
+				<div>
+					<div className="font-bold text-white leading-tight">{preorder.title}</div>
+					<div className="text-xs text-slate-500 mt-1">ID: #{preorder.id} • {new Date(preorder.created_at).toLocaleDateString()}</div>
+				</div>
+			</div>
+
+			<div className="grid grid-cols-2 md:flex items-center gap-8 flex-grow">
+				<div className="space-y-1">
+					<div className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Customer</div>
+					<div className="text-sm text-white flex items-center gap-1.5"><User className="w-3 h-3" /> {preorder.customer_name}</div>
+				</div>
+				<div className="space-y-1">
+					<div className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Contact</div>
+					<a href={preorder.social} target="_blank" className="text-sm text-emerald-500 hover:underline flex items-center gap-1">
+						Social <ExternalLink className="w-3 h-3" />
+					</a>
+				</div>
+				<div className="space-y-1">
+					<div className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Variant</div>
+					<div className="text-sm text-white">{preorder.color} / {preorder.size}</div>
+				</div>
+			</div>
+
+			{!isCompleted && onComplete && (
+				<LiquidButton onClick={onComplete} size="sm" className="w-full md:w-auto bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-500">
+					Mark Completed
+				</LiquidButton>
+			)}
+		</LiquidCard>
 	);
 }
