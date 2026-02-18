@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, HTMLMotionProps } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 interface Ripple {
@@ -10,14 +10,16 @@ interface Ripple {
   y: number;
 }
 
-interface LiquidButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface LiquidButtonProps extends React.ComponentPropsWithoutRef<typeof motion.button> {
   children: React.ReactNode;
-  variant?: 'primary' | 'outline' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'warning' | 'info' | 'error' | 'green' | 'outline' | 'ghost' | 'high-contrast';
+  size?: 'sm' | 'md' | 'lg';
 }
 
 export function LiquidButton({ 
   children, 
   variant = 'primary', 
+  size = 'md',
   className, 
   onClick,
   ...props 
@@ -39,9 +41,21 @@ export function LiquidButton({
   };
 
   const variants = {
-    primary: "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 border-emerald-500/30",
+    primary: "bg-gradient-to-r from-[#217c6b] to-[#58a076] text-white border-transparent",
+    secondary: "bg-white/10 hover:bg-white/20 text-white border-white/10",
+    warning: "bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-500 border-yellow-500/30",
+    info: "bg-blue-500/20 hover:bg-blue-500/30 text-blue-500 border-blue-500/30",
+    error: "bg-[#ec848c]/20 hover:bg-[#ec848c]/30 text-[#ec848c] border-[#ec848c]/30",
+    green: "bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-500 border-emerald-500/30",
     outline: "bg-transparent border-white/20 hover:border-white/40 text-white",
     ghost: "bg-transparent border-transparent hover:bg-white/5 text-slate-400 hover:text-white",
+    'high-contrast': "bg-white text-[#0a2735] border-transparent font-black",
+  };
+
+  const sizes = {
+    sm: "px-4 py-1.5 text-xs",
+    md: "px-6 py-2.5 text-sm",
+    lg: "px-8 py-4 text-lg",
   };
 
   return (
@@ -49,9 +63,10 @@ export function LiquidButton({
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       className={cn(
-        "relative overflow-hidden rounded-xl border px-6 py-2.5 text-sm font-medium transition-all duration-300",
+        "relative overflow-hidden rounded-full border font-bold transition-all duration-300",
         "backdrop-blur-[20px]",
         variants[variant],
+        sizes[size],
         className
       )}
       onClick={handleClick}

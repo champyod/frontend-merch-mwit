@@ -40,23 +40,37 @@ export type Item = {
 	material?: string;
 	is_preorder?: 0 | 1;
 	hidden?: 0 | 1;
+	payment_account_id?: number;
 	images?: { url: string }[];
 	color_size_arr?: ColorSize[];
-	//sizes?: { type: (typeof SIZES)[number]; quantity: number }[];
-	//colors?: { color: string }[];
+};
+
+export type OrderItem = {
+	item_id: number;
+	item: Item;
+	size: string;
+	color: string;
+	quantity: number;
+	price: number;
 };
 
 export type Preorder = {
-	created_at: string;
 	id: number;
-	item_id: number;
-	title: string;
+	created_at: string;
+	customer_uuid?: string;
 	customer_name: string;
 	social: string;
-	image_url: string;
+	contact_number: string;
+	shipping_method: "pickup" | "postal";
+	address: string;
+	items: OrderItem[];
+	total_price: number;
+	shipping_cost: number;
 	completed: 0 | 1;
-	size: (typeof SIZES)[number];
-	color: string | null;
+	payment_slip_url: string;
+	status: string;
+	tracking_no?: string;
+	note?: string;
 };
 
 export type MenuItem = {
@@ -68,5 +82,16 @@ export type MenuItem = {
 };
 
 export type Site = {
+	image_url?: string;
+};
+
+// Cart types
+export type CartItem = {
+	item_id: number;
+	title: string;
+	price: number;
+	size: string;
+	color: string;
+	quantity: number;
 	image_url?: string;
 };

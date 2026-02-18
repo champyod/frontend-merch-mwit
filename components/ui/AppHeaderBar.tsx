@@ -7,6 +7,8 @@ import Logo from "../Logo";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Preorder } from "@/types/types";
+import { useAuth } from "@/context/AuthContext";
+import UserMenu from "./UserMenu";
 
 type NavLink = {
 	href: string;
@@ -33,11 +35,10 @@ const NAV_LINKS: NavLink[] = [
 
 const MenuSidebar = ({
 	toggleMenu,
-	logout,
 }: {
 	toggleMenu: () => void;
-	logout: () => void;
 }) => {
+	const { logout } = useAuth();
 	return (
 		<>
 			{/* Dark overlay */}
@@ -95,22 +96,9 @@ const MenuSidebar = ({
 };
 
 export default function AppHeaderBar() {
-	const router = useRouter();
 	const [menuOpened, setMenuOpened] = useState<boolean>(false);
 	const toggleMenu = () => setMenuOpened(!menuOpened);
-
-	const logout = () => {
-		fetch("/api/auth/logout", {
-			method: "POST",
-		})
-			.then((res) => res.json())
-			.then((res) => {
-				if (res.payload.isAuthenticated) router.push("/login");
-			})
-			.catch((error) => {
-				console.error(error);
-			});
-	};
+	const { user } = useAuth();
 
 	return (
 		<header
@@ -125,28 +113,23 @@ export default function AppHeaderBar() {
 					</div>
 				</Link>
 
-				<div className="flex">
+				<div className="flex items-center">
 					{NAV_LINKS.length !== 0 &&
 						NAV_LINKS.map((item, index) => (
-							<p
+							<div
 								key={index}
 								className={
-									"hidden md:block mx-5 text-lg font-semibold text-white drop-shadow-lg"
+									"hidden md:flex items-center relative mx-5 text-lg font-semibold text-white drop-shadow-lg"
 								}
-								onClick={() => toggleMenu()}
 							>
 								<NavLink href={item.href} text={item.text} />
 								{item.text === "Preorders" && <Alert />}
-							</p>
+							</div>
 						))}
-					<p
-						className={
-							"hidden md:block mx-5 text-lg font-semibold text-white drop-shadow-lg cursor-pointer"
-						}
-						onClick={logout}
-					>
-						Logout
-					</p>
+					
+					<div className="hidden md:block ml-4">
+						<UserMenu />
+					</div>
 				</div>
 
 				{NAV_LINKS.length !== 0 && !menuOpened && (
@@ -175,7 +158,7 @@ export default function AppHeaderBar() {
 				)}
 
 				{menuOpened && (
-					<MenuSidebar toggleMenu={toggleMenu} logout={logout} />
+					<MenuSidebar toggleMenu={toggleMenu} />
 				)}
 			</nav>
 		</header>

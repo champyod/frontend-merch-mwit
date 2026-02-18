@@ -4,6 +4,11 @@ import NavLink from "./NavLink";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Logo from "../Logo";
+import { ShoppingCart, LogIn, Menu, X, ChevronRight } from "lucide-react";
+import { useCart } from "@/context/CartContext";
+import { motion, AnimatePresence } from "framer-motion";
+import { LiquidButton } from "./LiquidButton";
+import { LiquidCard } from "./LiquidCard";
 
 type NavLink = { slug: string; text: string };
 
@@ -15,132 +20,136 @@ const MenuSidebar = ({
 	navLinks: NavLink[];
 }) => {
 	return (
-		<>
-			{/* Dark overlay */}
-			<div
-				onClick={() => toggleMenu()}
-				className="cursor-pointer md:hidden absolute z-10 left-0 top-0 opacity-95 bg-gradient-to-l from-primary to-background w-screen h-screen"
-			></div>
+		<motion.div
+			initial={{ opacity: 0 }}
+			animate={{ opacity: 1 }}
+			exit={{ opacity: 0 }}
+			className="fixed inset-0 z-50 md:hidden"
+		>
+			<div onClick={toggleMenu} className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
 
-			{/* Menu sidebar */}
-			<div
-				className={`drop-shadow-xl md:hidden absolute z-20 top-0 right-0 h-screen w-fit`}
+			<LiquidCard 
+				variant="solid" 
+				className="absolute right-0 top-0 h-full w-[80%] max-w-[300px] flex flex-col p-6 rounded-none border-l border-white/10"
 			>
-				<div className="text-right">
-					<button
-						type="button"
-						aria-label="Close dropdown menu"
-						className={"md:hidden mr-3 mt-6 text-white"}
-						onClick={() => toggleMenu()}
-					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							className="h-6 w-6"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-							strokeWidth={2}
-						>
-							<path
-								strokeLinecap="round"
-								strokeLinejoin="round"
-								d="M6 18L18 6M6 6l12 12"
-							/>
-						</svg>
-					</button>
-
-					{navLinks.slice(0, 5).map((item, index) => (
-						<p
-							key={index}
-							className="md:hidden mx-5 my-8 text-2xl decoration-white text-white font-semibold"
-							onClick={() => toggleMenu()}
-						>
-							<NavLink href={`/${item.slug}`} text={item.text} />
-						</p>
-					))}
-					<MobileOthersDropdown
-						navLinks={navLinks.slice(5)}
-						closeSidebar={toggleMenu}
-					/>
+				<div className="flex justify-between items-center mb-10">
+					<Logo />
+					<LiquidButton variant="ghost" size="sm" onClick={toggleMenu} className="p-2">
+						<X className="w-6 h-6" />
+					</LiquidButton>
 				</div>
-			</div>
-		</>
+
+				<div className="flex flex-col gap-6 overflow-y-auto flex-1">
+					<Link
+						href="/"
+						className="text-2xl font-bold text-white/90 hover:text-[#58a076] transition-colors"
+						onClick={toggleMenu}
+					>
+						Home
+					</Link>
+					{navLinks && navLinks.map((item, index) => (
+						<Link
+							key={index}
+							href={`/${item.slug}`}
+							className="text-2xl font-bold text-white/90 hover:text-[#58a076] transition-colors"
+							onClick={toggleMenu}
+						>
+							{item.text}
+						</Link>
+					))}
+				</div>
+
+				<div className="pt-6 border-t border-white/10 mt-auto">
+					<Link href="/login" onClick={toggleMenu}>
+						<LiquidButton variant="primary" size="lg" className="w-full gap-2">
+							<LogIn className="w-5 h-5" />
+							Login
+						</LiquidButton>
+					</Link>
+				</div>
+			</LiquidCard>
+		</motion.div>
 	);
 };
 
 export default function HeaderBar() {
-	const [menuOpened, setMenuOpened] = useState<Boolean>(false);
+	const [menuOpened, setMenuOpened] = useState(false);
+	const [scrolled, setScrolled] = useState(false);
 	const toggleMenu = () => setMenuOpened(!menuOpened);
+	const { cart } = useCart();
+	const cartCount = cart ? cart.reduce((total, item) => total + item.quantity, 0) : 0;
 
 	const [navLinks, setNavLinks] = useState<NavLink[]>([]);
+
 	useEffect(() => {
 		fetch("/api/page")
 			.then((res) => res.json())
 			.then((res) => {
 				if (res.hasError) throw new Error("Error fetching nav links");
-				setNavLinks(res.payload);
-			});
+				setNavLinks(res.payload || []);
+			}).catch(() => setNavLinks([]));
+
+		const handleScroll = () => {
+			setScrolled(window.scrollY > 20);
+		};
+		window.addEventListener("scroll", handleScroll);
+		return () => window.removeEventListener("scroll", handleScroll);
 	}, []);
 
 	return (
 		<header
-			className={`fixed z-10 w-full bg-primary bg-opacity-90 backdrop-blur-lg backdrop-filter`}
+			className={`fixed top-0 z-40 w-full transition-all duration-500 ${
+				scrolled ? "py-2 bg-[#0a2735]/80 backdrop-blur-xl border-b border-white/5" : "py-4 bg-transparent"
+			}`}
 		>
-			<nav
-				className={`flex p-3 items-center justify-between md:justify-around`}
-			>
-				<Link href="/">
-					<div className="cursor-pointer">
-						<Logo />
-					</div>
+			<nav className="container mx-auto px-4 md:px-6 flex items-center justify-between">
+				<Link href="/" className="transition-transform duration-300 hover:scale-105 active:scale-95">
+					<Logo />
 				</Link>
 
-				<div className="flex">
-					{navLinks.length !== 0 &&
-						navLinks.slice(0, 5).map((item, index) => (
-							<p
-								key={index}
-								className={
-									"hidden md:block mx-5 text-lg font-semibold text-white drop-shadow-lg"
-								}
-								onClick={() => toggleMenu()}
-							>
-								<NavLink
-									href={`/${item.slug}`}
-									text={item.text}
-								/>
-							</p>
-						))}
-					<OthersDropdown navLinks={navLinks.slice(5)} />
+				<div className="hidden md:flex items-center gap-1">
+					<NavLink href="/" text="Home" />
+					{navLinks && navLinks.slice(0, 5).map((item, index) => (
+						<NavLink
+							key={index}
+							href={`/${item.slug}`}
+							text={item.text}
+						/>
+					))}
+					{navLinks && navLinks.length > 5 && (
+						<OthersDropdown navLinks={navLinks.slice(5)} />
+					)}
 				</div>
 
-				{navLinks.length !== 0 && !menuOpened && (
-					<button
-						type="button"
-						aria-label="Open dropdown menu"
-						className="md:hidden pb-1 text-white rounded-lg drop-shadow-lg"
-						onClick={toggleMenu}
-					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							className="h-6 w-6"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-							strokeWidth={2}
-						>
-							<path
-								strokeLinecap="round"
-								strokeLinejoin="round"
-								d="M4 6h16M4 12h16m-7 6h7"
-							/>
-						</svg>
-					</button>
-				)}
+				<div className="flex items-center gap-3 md:gap-4">
+					<Link href="/cart">
+						<LiquidButton variant="secondary" size="sm" className="relative p-2 rounded-full min-w-0">
+							<ShoppingCart className="w-5 h-5" />
+							{cartCount > 0 && (
+								<span className="absolute -top-1 -right-1 bg-[#ec848c] text-white text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center px-1 rounded-full shadow-lg border-2 border-[#0a2735]">
+									{cartCount}
+								</span>
+							)}
+						</LiquidButton>
+					</Link>
 
-				{menuOpened && (
-					<MenuSidebar toggleMenu={toggleMenu} navLinks={navLinks} />
-				)}
+					<Link href="/login" className="hidden md:block">
+						<LiquidButton variant="primary" size="md" className="gap-2">
+							<LogIn className="w-4 h-4" />
+							Login
+						</LiquidButton>
+					</Link>
+
+					<LiquidButton variant="secondary" size="sm" onClick={toggleMenu} className="md:hidden p-2 min-w-0 rounded-full">
+						<Menu className="w-6 h-6" />
+					</LiquidButton>
+				</div>
+
+				<AnimatePresence>
+					{menuOpened && (
+						<MenuSidebar toggleMenu={toggleMenu} navLinks={navLinks} />
+					)}
+				</AnimatePresence>
 			</nav>
 		</header>
 	);
@@ -148,108 +157,42 @@ export default function HeaderBar() {
 
 function OthersDropdown({ navLinks }: { navLinks: NavLink[] }) {
 	const [isOpen, setIsOpen] = useState(false);
-	const toggleMenu = () => setIsOpen(!isOpen);
 
 	if (navLinks.length === 0) return null;
 	return (
-		<>
-			{isOpen && (
-				<div
-					onClick={toggleMenu}
-					className="cursor-pointer absolute left-0 top-0 w-screen h-screen"
-				/>
-			)}
-
-			<div className="hidden md:block mx-5 text-lg font-semibold text-white">
-				<button
-					type="button"
-					className="inline-flex justify-center items-center"
-					id="options-menu"
-					aria-expanded="true"
-					aria-haspopup="true"
-					onClick={toggleMenu}
-				>
-					Others
-					<svg
-						className={isOpen ? "rotate-180" : ""}
-						xmlns="http://www.w3.org/2000/svg"
-						width="24"
-						height="24"
-						viewBox="0 0 24 24"
-					>
-						<path fill="currentColor" d="m7 10l5 5l5-5z" />
-					</svg>
-				</button>
-
-				{isOpen && (
-					<div
-						className="absolute rounded-lg drop-shadow-lg bg-[#191919] bg-opacity-90"
-						role="menu"
-						aria-orientation="vertical"
-						aria-labelledby="options-menu"
-					>
-						{navLinks.map((item, index) => (
-							<p
-								key={index}
-								className="mx-5 my-8 text-lg decoration-white text-white font-semibold"
-								onClick={toggleMenu}
-							>
-								<NavLink
-									href={`/${item.slug}`}
-									text={item.text}
-								/>
-							</p>
-						))}
-					</div>
-				)}
-			</div>
-		</>
-	);
-}
-
-function MobileOthersDropdown({
-	navLinks,
-	closeSidebar,
-}: {
-	navLinks: NavLink[];
-	closeSidebar: () => void;
-}) {
-	const [isOpen, setIsOpen] = useState(false);
-	const toggleMenu = () => setIsOpen(!isOpen);
-
-	if (navLinks.length === 0) return null;
-	return (
-		<div className="md:hidden mx-5 my-8 text-2xl text-white">
-			<button
-				type="button"
-				className="inline-flex justify-center items-center font-semibold"
-				id="options-menu"
-				aria-expanded="true"
-				aria-haspopup="true"
-				onClick={toggleMenu}
+		<div className="relative group ml-2" onMouseEnter={() => setIsOpen(true)} onMouseLeave={() => setIsOpen(false)}>
+			<LiquidButton 
+				variant="ghost" 
+				size="md" 
+				className={`gap-1 ${isOpen ? "text-[#58a076]" : "text-white/70"}`}
 			>
 				Others
-				<svg
-					className={isOpen ? "rotate-180" : ""}
-					xmlns="http://www.w3.org/2000/svg"
-					width="24"
-					height="24"
-					viewBox="0 0 24 24"
-				>
-					<path fill="currentColor" d="m7 10l5 5l5-5z" />
-				</svg>
-			</button>
+				<ChevronRight className={`w-4 h-4 transition-transform duration-300 ${isOpen ? "rotate-90" : ""}`} />
+			</LiquidButton>
 
-			{isOpen &&
-				navLinks.map((item, index) => (
-					<div
-						key={index}
-						className="my-5 text-2xl decoration-white font-semibold"
-						onClick={() => closeSidebar()}
+			<AnimatePresence>
+				{isOpen && (
+					<motion.div
+						initial={{ opacity: 0, y: 10, scale: 0.95 }}
+						animate={{ opacity: 1, y: 0, scale: 1 }}
+						exit={{ opacity: 0, y: 10, scale: 0.95 }}
+						transition={{ duration: 0.2 }}
+						className="absolute top-full left-0 mt-2 min-w-[160px] z-50"
 					>
-						<NavLink href={`/${item.slug}`} text={item.text} />
-					</div>
-				))}
+						<LiquidCard variant="glass" className="p-2 rounded-2xl">
+							{navLinks.map((item, index) => (
+								<Link
+									key={index}
+									href={`/${item.slug}`}
+									className="block w-full text-left px-4 py-3 rounded-xl text-sm font-bold text-white/80 hover:text-white hover:bg-white/10 transition-all"
+								>
+									{item.text}
+								</Link>
+							))}
+						</LiquidCard>
+					</motion.div>
+				)}
+			</AnimatePresence>
 		</div>
 	);
 }

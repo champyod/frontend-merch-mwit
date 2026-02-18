@@ -1,3 +1,5 @@
+const { withIntlayer } = require("next-intlayer/server");
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
 	async rewrites() {
@@ -20,4 +22,4 @@ const nextConfig = {
 	},
 };
 
-module.exports = nextConfig;
+module.exports = withIntlayer(nextConfig);

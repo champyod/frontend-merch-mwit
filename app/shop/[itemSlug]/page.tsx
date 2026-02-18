@@ -1,5 +1,5 @@
-import PreorderForm from "@/components/ui/PreorderForm";
 import SocialReminder from "@/components/ui/SocialReminder";
+import AddToCart from "@/components/ui/AddToCart";
 import { ImageGallery } from "./ImageGallery";
 import { Item, SIZES } from "@/types/types";
 import { Metadata } from "next";
@@ -115,10 +115,7 @@ export default async function ItemPage({
 					))}
 				</div>
 				{item.is_preorder ? (
-					<PreorderForm
-						colorSizeArr={item.color_size_arr}
-						itemId={itemId}
-					/>
+					<AddToCart item={item} />
 				) : (
 					<SocialReminder />
 				)}

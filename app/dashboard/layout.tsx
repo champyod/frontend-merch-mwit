@@ -2,7 +2,9 @@
 
 import AppHeaderBar from "@/components/ui/AppHeaderBar";
 import Loader from "@/components/ui/Loader";
-import useAuth from "@/hooks/useRedirect";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 
@@ -13,9 +15,16 @@ export default function DahboardRootLayout({
 }: {
 	children: React.ReactNode;
 }) {
-	const { data } = useAuth({});
+	const { user, isLoading } = useAuth();
+	const router = useRouter();
 
-	if (!data || !data.payload.isAuthenticated) return <Loader />;
+	useEffect(() => {
+		if (!isLoading && (!user || user.role !== "admin")) {
+			router.push("/");
+		}
+	}, [user, isLoading, router]);
+
+	if (isLoading || !user || user.role !== "admin") return <Loader />;
 
 	return (
 		<QueryClientProvider client={queryClient}>

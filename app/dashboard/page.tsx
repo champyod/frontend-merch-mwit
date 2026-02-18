@@ -12,9 +12,8 @@ export default function DashboardPage() {
 	return (
 		<>
 			<h1 className="text-2xl pb-1 ont-bold">
-				Hi <i>{userData.payload.role}</i>, {userData.payload.username}
-			</h1>
-			<h2 className="text-3xl font-bold">Dashboard</h2>
+									Hi <i>{userData.payload.role}</i>
+								</h1>			<h2 className="text-3xl font-bold">Dashboard</h2>
 			<h3 className="text-xl pt-10 pb-5 font-bold">
 				What&apos;d you like to do today?
 			</h3>

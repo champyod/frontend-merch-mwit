@@ -4,9 +4,9 @@ import React, { useRef } from 'react';
 import { motion, useSpring, useMotionValue, useTransform } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
-interface LiquidCardProps extends React.HTMLAttributes<HTMLDivElement> {
+interface LiquidCardProps extends React.ComponentPropsWithoutRef<typeof motion.div> {
   children: React.ReactNode;
-  variant?: 'default' | 'interactive';
+  variant?: 'default' | 'interactive' | 'glass' | 'solid';
 }
 
 export function LiquidCard({ 
@@ -46,6 +46,13 @@ export function LiquidCard({
     y.set(0);
   };
 
+  const variants = {
+    default: "backdrop-blur-[40px] bg-white/[0.04] border-white/[0.12]",
+    interactive: "cursor-pointer hover:shadow-2xl hover:bg-white/[0.08] border-white/[0.12]",
+    glass: "backdrop-blur-xl bg-white/[0.03] border-white/10 shadow-2xl",
+    solid: "bg-[#0a2735] border-white/5",
+  };
+
   return (
     <motion.div
       ref={cardRef}
@@ -59,10 +66,8 @@ export function LiquidCard({
         transformStyle: 'preserve-3d',
       }}
       className={cn(
-        "relative rounded-2xl p-px overflow-hidden transition-all duration-500",
-        "backdrop-blur-[40px] bg-white/[0.04] dark:bg-slate-900/[0.06]",
-        "border border-white/[0.12] dark:border-slate-700/[0.20]",
-        variant === 'interactive' && "cursor-pointer hover:shadow-2xl hover:bg-white/[0.08] dark:hover:bg-slate-900/[0.10]",
+        "relative rounded-[2rem] p-px overflow-hidden transition-all duration-500 border",
+        variants[variant],
         className
       )}
       {...props}

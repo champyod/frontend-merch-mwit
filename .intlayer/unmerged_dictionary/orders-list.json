@@ -1,0 +1,66 @@
+[
+  {
+    "key": "orders-list",
+    "content": {
+      "title": {
+        "nodeType": "translation",
+        "translation": {
+          "en": "My Orders",
+          "th": "คำสั่งซื้อของฉัน"
+        }
+      },
+      "subtitle": {
+        "nodeType": "translation",
+        "translation": {
+          "en": "Manage and track your MWIT Merch orders.",
+          "th": "จัดการและติดตามคำสั่งซื้อ MWIT Merch ของคุณ"
+        }
+      },
+      "emptyTitle": {
+        "nodeType": "translation",
+        "translation": {
+          "en": "No orders yet",
+          "th": "ยังไม่มีคำสั่งซื้อ"
+        }
+      },
+      "emptyDescription": {
+        "nodeType": "translation",
+        "translation": {
+          "en": "You haven't placed any orders yet. Start shopping!",
+          "th": "คุณยังไม่ได้สั่งซื้อสินค้า เริ่มช้อปเลย!"
+        }
+      },
+      "browseProducts": {
+        "nodeType": "translation",
+        "translation": {
+          "en": "Browse Products",
+          "th": "ดูสินค้า"
+        }
+      },
+      "orderIdLabel": {
+        "nodeType": "translation",
+        "translation": {
+          "en": "Order #",
+          "th": "คำสั่งซื้อ #"
+        }
+      },
+      "totalAmountLabel": {
+        "nodeType": "translation",
+        "translation": {
+          "en": "Total Amount",
+          "th": "ยอดรวม"
+        }
+      },
+      "currency": {
+        "nodeType": "translation",
+        "translation": {
+          "en": "฿",
+          "th": "฿"
+        }
+      }
+    },
+    "location": "local",
+    "localId": "orders-list::local::components/orders/OrdersList.content.ts",
+    "filePath": "components/orders/OrdersList.content.ts"
+  }
+]

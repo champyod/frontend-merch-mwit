@@ -7,7 +7,6 @@ import { useEffect } from "react";
 type UserResp = {
 	payload: {
 		isAuthenticated: boolean;
-		username: string;
 		role: string;
 	};
 };

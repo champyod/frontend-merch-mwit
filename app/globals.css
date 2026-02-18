@@ -3,24 +3,50 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 255, 255, 255;
-  --background-start-rgb: 15, 23, 42;
-  --background-end-rgb: 2, 6, 23;
+  --radius: 0.75rem;
+  /* OPH 2025 Palette */
+  --primary: #58a076;
+  --primary-dark: #217c6b;
+  --secondary: #a9c081;
+  --navy: #0a2735;
+  --teal-dark: #18666a;
+  --mint: #92c9c4;
+  --coral: #ec848c;
+  --yellow: #e9dd67;
+  
+  --background: #0a2735;
+  --foreground: #ffffff;
+  
+  --card: rgba(24, 102, 106, 0.2);
+  --card-border: rgba(146, 201, 196, 0.2);
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      rgb(var(--background-start-rgb)),
-      rgb(var(--background-end-rgb))
-    );
+  color: var(--foreground);
+  background-color: var(--background);
+  background-image: 
+    radial-gradient(circle at 0% 0%, rgba(33, 124, 107, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 100% 100%, rgba(88, 160, 118, 0.1) 0%, transparent 50%);
+  background-attachment: fixed;
   min-height: 100vh;
+  font-feature-settings: "cv11", "ss01";
 }
 
 @layer components {
   .glass-panel {
-    @apply backdrop-blur-[40px] bg-white/[0.04] border border-white/[0.12] shadow-2xl;
+    @apply backdrop-blur-xl bg-white/[0.03] border border-white/[0.08] shadow-2xl;
+  }
+  
+  .btn-primary {
+    @apply px-6 py-2.5 rounded-full font-bold transition-all duration-300
+           bg-gradient-to-r from-[#217c6b] to-[#58a076] text-white
+           hover:shadow-[0_0_20px_rgba(88,160,118,0.4)] hover:scale-[1.02] active:scale-[0.98];
+  }
+
+  .btn-outline {
+    @apply px-6 py-2.5 rounded-full font-bold transition-all duration-300
+           border border-white/20 text-white hover:bg-white/10
+           active:scale-[0.98];
   }
 }
 
@@ -38,4 +64,15 @@ body {
     transform: scale(4);
     opacity: 0;
   }
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom Selection */
+::selection {
+  background: rgba(88, 160, 118, 0.3);
+  color: #ffffff;
 }
