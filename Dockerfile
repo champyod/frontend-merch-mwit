@@ -1,5 +1,5 @@
 # Frontend-Merch-MWIT Dockerfile (MWIT-LINK Pattern)
-FROM oven/bun:1.1-alpine AS builder
+FROM oven/bun:alpine AS builder
 WORKDIR /app
 
 # Copy lockfile and package.json
