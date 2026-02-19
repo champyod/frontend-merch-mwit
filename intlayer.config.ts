@@ -2,8 +2,14 @@ import { type IntlayerConfig, Locales } from "intlayer";
 
 const config: IntlayerConfig = {
   internationalization: {
-    locales: [Locales.ENGLISH, Locales.THAI],
-    defaultLocale: Locales.ENGLISH,
+    locales: [Locales.THAI, Locales.ENGLISH],
+    defaultLocale: Locales.THAI,
+  },
+  routing: {
+    mode: "prefix-all",
+  },
+  build: {
+    optimize: true,
   },
 };
 

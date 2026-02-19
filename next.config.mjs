@@ -1,4 +1,4 @@
-const { withIntlayer } = require("next-intlayer/server");
+import { withIntlayer } from "next-intlayer/server";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -22,4 +22,4 @@ const nextConfig = {
 	},
 };
 
-module.exports = withIntlayer(nextConfig);
+export default withIntlayer(nextConfig);

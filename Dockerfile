@@ -1,29 +1,62 @@
 # Frontend-Merch-MWIT Dockerfile (MWIT-LINK Pattern)
-FROM oven/bun:alpine AS builder
+# Stage 1: Dependencies
+FROM node:20-alpine AS deps
 WORKDIR /app
 
-# Copy lockfile and package.json
-COPY package.json bun.lock ./
-RUN bun install --frozen-lockfile
+# Copy package files
+COPY package.json bun.lock* ./
 
+# Install dependencies (including devDependencies for build)
+RUN npm install
+
+# Stage 2: Builder
+FROM node:20-alpine AS builder
+WORKDIR /app
+
+# Copy dependencies from deps stage
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copy application code
 COPY . .
 
-# Build the application
-ARG API_URL=http://localhost:8080
-ENV API_URL=$API_URL
-RUN bun run build
+# Build configuration
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
 
-# Runner stage
+# Build the application
+RUN npm run build
+
+# Stage 3: Runtime (Bun)
 FROM oven/bun:1.1-alpine
 WORKDIR /app
 
-COPY --from=builder /app/next.config.js ./
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
+
+# Copy necessary files from builder
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/docker-entrypoint.sh ./
 
-RUN chmod +x docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+# Set correct permissions
+RUN chown -R nextjs:nodejs /app
+
+# Switch to non-root user
+USER nextjs
+
+# Expose port
 EXPOSE 3000
-CMD ["./docker-entrypoint.sh"]
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+# Entrypoint script
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["bun", "server.js"]
