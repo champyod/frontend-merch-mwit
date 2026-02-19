@@ -18,17 +18,47 @@ interface BaseProps {
 
 // --- Layout Primitives ---
 
-export const Box = ({ children, className, ...props }: BaseProps & React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn(className)} {...props}>
+export const Box = ({ 
+  children, 
+  className, 
+  as: Component = "div",
+  ...props 
+}: BaseProps & { as?: any } & React.HTMLAttributes<HTMLDivElement>) => (
+  <Component className={cn(className)} {...props}>
     {children}
-  </div>
+  </Component>
 );
 
-export const Stack = ({ children, className, gap = 4, ...props }: BaseProps & { gap?: number }) => (
-  <div className={cn("flex flex-col", `gap-${gap}`, className)} {...props}>
-    {children}
-  </div>
-);
+export const Stack = ({ 
+  children, 
+  className, 
+  gap = 4, 
+  alignItems,
+  justifyContent,
+  ...props 
+}: BaseProps & { 
+  gap?: number;
+  alignItems?: "start" | "center" | "end" | "baseline" | "stretch";
+  justifyContent?: "start" | "center" | "end" | "between" | "around" | "evenly";
+}) => {
+  const alignMap = { start: "items-start", center: "items-center", end: "items-end", baseline: "items-baseline", stretch: "items-stretch" };
+  const justifyMap = { start: "justify-start", center: "justify-center", end: "justify-end", between: "justify-between", around: "justify-around", evenly: "justify-evenly" };
+
+  return (
+    <div 
+      className={cn(
+        "flex flex-col", 
+        `gap-${gap}`, 
+        alignItems && alignMap[alignItems],
+        justifyContent && justifyMap[justifyContent],
+        className
+      )} 
+      {...props}
+    >
+      {children}
+    </div>
+  );
+};
 
 export const Flex = ({ 
   children, 
@@ -105,18 +135,23 @@ export const Text = ({
   weight = "normal", 
   color,
   uppercase,
+  italic,
   tracking,
   align,
   ...props 
 }: BaseProps & { 
-  size?: "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
+  size?: "xs" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl";
   weight?: "normal" | "medium" | "bold" | "black";
   color?: string;
   uppercase?: boolean;
+  italic?: boolean;
   tracking?: "tight" | "normal" | "wide" | "widest";
   align?: "left" | "center" | "right";
 }) => {
-  const sizeMap = { xs: "text-xs", sm: "text-sm", md: "text-base", lg: "text-lg", xl: "text-xl", "2xl": "text-2xl" };
+  const sizeMap = { 
+    xs: "text-xs", sm: "text-sm", md: "text-base", lg: "text-lg", xl: "text-xl", 
+    "2xl": "text-2xl", "3xl": "text-3xl", "4xl": "text-4xl" 
+  };
   const weightMap = { normal: "font-normal", medium: "font-medium", bold: "font-bold", black: "font-black" };
   const trackingMap = { tight: "tracking-tighter", normal: "tracking-normal", wide: "tracking-wide", widest: "tracking-widest" };
   const alignMap = { left: "text-left", center: "text-center", right: "text-right" };
@@ -128,6 +163,7 @@ export const Text = ({
         weightMap[weight], 
         color, 
         uppercase && "uppercase", 
+        italic && "italic",
         tracking && trackingMap[tracking],
         align && alignMap[align],
         className
