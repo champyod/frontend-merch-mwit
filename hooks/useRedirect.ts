@@ -1,39 +1,39 @@
 "use client";
 
-import useSWR from "swr";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
 
-type UserResp = {
-	payload: {
-		isAuthenticated: boolean;
-		role: string;
-	};
-};
 type UseAuthProps = {
 	redirectIfFound?: boolean;
 };
-type UseAuthReturn = {
-	data: UserResp | null;
-};
 
-const swrFetcher = (url: string) => fetch(url).then((r) => r.json());
-
-export default function useAuth({
+/**
+ * Hook to handle redirection based on authentication state.
+ * If not authenticated, redirects to login (unless redirectIfFound is true).
+ * If authenticated and redirectIfFound is true, redirects to dashboard.
+ */
+export default function useRedirect({
 	redirectIfFound = false,
-}: UseAuthProps): UseAuthReturn {
+}: UseAuthProps = {}) {
 	const router = useRouter();
-
-	const { data } = useSWR(`/api/auth`, swrFetcher);
+	const { user, isLoading } = useAuth();
 
 	useEffect(() => {
-		if (!data || !data.payload) return;
+		if (isLoading) return;
 
-		const { isAuthenticated } = data.payload;
-		if (!isAuthenticated) return router.push("/login");
-		if (isAuthenticated && redirectIfFound)
-			return router.push("/dashboard");
-	}, [data, redirectIfFound, router]);
+		if (!user) {
+			if (!redirectIfFound) {
+				router.push("/login");
+			}
+			return;
+		}
 
-	return { data };
+		// If user is found and we should redirect if found (e.g., on login page)
+		if (redirectIfFound) {
+			router.push("/dashboard");
+		}
+	}, [user, isLoading, redirectIfFound, router]);
+
+	return { user, isLoading };
 }
