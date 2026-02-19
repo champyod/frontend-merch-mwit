@@ -32,7 +32,7 @@ export type Item = {
 	slug: string;
 	text: string;
 	ID?: number;
-	last_edited_by_username?: string;
+	last_edited_by_name?: string;
 	discount?: number;
 	discount_type?: "dollar" | "percent";
 	name?: string;

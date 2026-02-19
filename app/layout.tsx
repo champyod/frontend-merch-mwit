@@ -8,8 +8,10 @@ import { Site } from "@/types/types";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
 
+import { IntlayerServerProvider } from "next-intlayer/server";
+import { IntlayerClientProvider } from "@/components/IntlayerClientProvider";
+
 export const dynamic = "force-dynamic";
-// ... (generateMetadata remains same)
 
 export default function RootLayout({
 	children,
@@ -21,13 +23,17 @@ export default function RootLayout({
 			<Analytics />
 
 			<body>
-				<AuthProvider>
-					<CartProvider>
-						<HeaderBar />
-						{children}
-						<Footer brandName={BRAND_NAME} />
-					</CartProvider>
-				</AuthProvider>
+				<IntlayerServerProvider>
+					<IntlayerClientProvider>
+						<AuthProvider>
+							<CartProvider>
+								<HeaderBar />
+								{children}
+								<Footer brandName={BRAND_NAME} />
+							</CartProvider>
+						</AuthProvider>
+					</IntlayerClientProvider>
+				</IntlayerServerProvider>
 			</body>
 		</html>
 	);

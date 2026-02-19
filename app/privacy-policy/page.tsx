@@ -30,7 +30,7 @@ export default function PrivacyPolicy() {
 				to all the terms and conditions of this agreement, then you may
 				not access the website or use any Services. If these Terms of
 				Service are considered an offer, acceptance is expressly limited
-				to these Terms of Service. <br /> <br /> Any new features or
+				to these Terms of Service. <br /> <br /> <br /> <br /> Any new features or
 				tools which are added to the current store shall also be subject
 				to the Terms of Service. You can review the most current version
 				of the Terms of Service at any time on this page. We reserve the
@@ -39,9 +39,7 @@ export default function PrivacyPolicy() {
 				your responsibility to check this page periodically for changes.
 				Your continued use of or access to the website following the
 				posting of any changes constitutes acceptance of those changes.{" "}
-				<br /> <br /> Our store is hosted on Shopify Inc. They provide
-				us with the online e-commerce platform that allows us to sell
-				our products and Services to you. <br /> <br />{" "}
+				<br /> <br />{" "}
 				<strong>SECTION 1 - ONLINE STORE TERMS</strong> <br /> By
 				agreeing to these Terms of Service, you represent that you are
 				at least the age of majority in your state or province of
@@ -101,7 +99,7 @@ export default function PrivacyPolicy() {
 				<br /> Certain products or Services may be available exclusively
 				online through the website. These products or Services may have
 				limited quantities and are subject to return or exchange only
-				according to our Refund Policy: [LINK TO REFUND POLICY] <br />{" "}
+				according to our Refund Policy: <a href="/refund-policy" className="underline">/refund-policy</a> <br />{" "}
 				We have made every effort to display as accurately as possible
 				the colors and images of our products that appear at the store.
 				We cannot guarantee that your computer {"monitor's"} display of
@@ -138,7 +136,7 @@ export default function PrivacyPolicy() {
 				including your email address and credit card numbers and
 				expiration dates, so that we can complete your transactions and
 				contact you as needed. <br /> <br /> For more details, please
-				review our Refund Policy: [LINK TO REFUND POLICY] <br /> <br />{" "}
+				review our Refund Policy: <a href="/refund-policy" className="underline">/refund-policy</a> <br /> <br />{" "}
 				<strong>SECTION 7 - OPTIONAL TOOLS</strong> <br /> We may
 				provide you with access to third-party tools over which we
 				neither monitor nor have any control nor input. <br /> You
@@ -203,8 +201,7 @@ export default function PrivacyPolicy() {
 				any comments posted by you or any third-party. <br /> <br />{" "}
 				<strong>SECTION 10 - PERSONAL INFORMATION</strong> <br /> Your
 				submission of personal information through the store is governed
-				by our Privacy Policy, which can be viewed here: [LINK TO
-				PRIVACY POLICY] <br /> <br />{" "}
+				by our Privacy Policy, which can be viewed here: <a href="/privacy-policy" className="underline">/privacy-policy</a> <br /> <br />{" "}
 				<strong>SECTION 11 - ERRORS, INACCURACIES AND OMISSIONS</strong>{" "}
 				<br /> Occasionally there may be information on our site or in
 				the Service that contains typographical errors, inaccuracies or
