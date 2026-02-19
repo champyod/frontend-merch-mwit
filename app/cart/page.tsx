@@ -2,84 +2,110 @@
 
 import { useCart } from "@/context/CartContext";
 import PreorderForm from "@/components/preorder/PreorderForm";
-import { LiquidCard } from "@/components/ui/LiquidCard";
 import { Trash2, ShoppingBag, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { CartItem } from "@/types/types";
+import { useIntlayer } from "next-intlayer";
+import { Box, Card, Heading, Text, Button, Stack, Container, Flex } from "@/components/ui/primitives";
+import Loader from "@/components/ui/Loader";
+import { calculateCartSubtotal } from "@/lib/logic";
 
 export default function CartPage() {
-  const { cart, removeFromCart } = useCart();
+  const { cart, removeFromCart, isLoading } = useCart();
+  const t = useIntlayer("cart");
 
-  const subtotal = cart.reduce((total: number, item: CartItem) => total + (item.price * item.quantity), 0);
+  const subtotal = calculateCartSubtotal(cart);
+
+  if (isLoading && cart.length === 0) {
+    return (
+      <Box className="min-h-screen bg-[#0a2735] pt-32 p-10 flex items-center justify-center">
+        <Loader />
+      </Box>
+    );
+  }
 
   if (cart.length === 0) {
     return (
-      <div className="min-h-screen bg-secondary pt-32 p-10 flex flex-col items-center justify-center text-center">
-        <ShoppingBag className="w-20 h-20 text-slate-700 mb-4" />
-        <h1 className="text-3xl font-bold text-white mb-2">Your cart is empty</h1>
-        <p className="text-slate-400 mb-8">Add some awesome merch to get started!</p>
-        <Link href="/" className="px-8 py-3 bg-emerald-500 text-white rounded-full font-bold hover:bg-emerald-600 transition-all">
-          Go Shopping
-        </Link>
-      </div>
+      <Box className="min-h-screen bg-[#0a2735] pt-32 p-10 flex flex-col items-center justify-center text-center">
+        <Stack gap={6} alignItems="center">
+          <ShoppingBag className="w-20 h-20 text-slate-700" />
+          <Stack gap={2}>
+            <Heading level={1} size="3xl" color="text-white">{t.emptyTitle.value}</Heading>
+            <Text color="text-slate-400">{t.emptySubtitle.value}</Text>
+          </Stack>
+          <Link href="/">
+            <Button variant="primary" size="lg">
+              {t.goShopping.value}
+            </Button>
+          </Link>
+        </Stack>
+      </Box>
     );
   }
 
   return (
-    <div className="min-h-screen bg-secondary pt-32 pb-20 px-4 md:px-10 max-w-6xl mx-auto">
-      <div className="flex items-center gap-4 mb-10">
-        <Link href="/" className="p-2 text-slate-400 hover:text-white transition-all bg-white/5 rounded-full">
-           <ArrowLeft className="w-6 h-6" />
-        </Link>
-        <h1 className="text-4xl font-bold text-white">Shopping Cart</h1>
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        <div className="lg:col-span-2 space-y-4">
-          {cart.map((item: CartItem, index: number) => (
-            <LiquidCard key={`${item.item_id}-${item.size}-${item.color}-${index}`} className="p-4 flex gap-4 items-center">
-              {item.image_url ? (
-                <img src={item.image_url} alt={item.title} className="w-20 h-20 rounded-lg object-cover bg-white/5" />
-              ) : (
-                <div className="w-20 h-20 rounded-lg bg-white/5 flex items-center justify-center">
-                   <ShoppingBag className="w-8 h-8 text-slate-700" />
-                </div>
-              )}
-              <div className="flex-1">
-                <h3 className="text-lg font-bold text-white">{item.title}</h3>
-                <p className="text-sm text-slate-400">
-                  {item.color} {item.size ? `| Size: ${item.size}` : ""}
-                </p>
-                <div className="flex items-center gap-4 mt-1">
-                   <p className="text-emerald-500 font-bold">฿{item.price.toLocaleString()}</p>
-                   <p className="text-slate-500 text-sm">Qty: {item.quantity}</p>
-                </div>
-              </div>
-              <button 
-                onClick={() => removeFromCart(index)}
-                className="p-2 text-slate-500 hover:text-red-500 transition-all hover:bg-red-500/10 rounded-full"
-                title="Remove item"
-              >
-                <Trash2 className="w-5 h-5" />
-              </button>
-            </LiquidCard>
-          ))}
-          
-          <div className="mt-8 p-6 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm">
-             <div className="flex justify-between items-center text-xl font-bold text-white">
-                <span>Subtotal</span>
-                <span className="text-emerald-500">฿{subtotal.toLocaleString()}</span>
-             </div>
-             <p className="text-slate-400 text-sm mt-1">Shipping and total will be calculated in the checkout form.</p>
-          </div>
-        </div>
+    <Box className="min-h-screen bg-[#0a2735] pt-32 pb-20 px-4">
+      <Container maxWidth="6xl">
+        <Flex gap={4} className="mb-10" alignItems="center">
+          <Link href="/">
+             <Button variant="secondary" size="sm" className="p-2 rounded-full min-w-0">
+                <ArrowLeft className="w-6 h-6" />
+             </Button>
+          </Link>
+          <Heading level={1} size="4xl" color="text-white">{t.title.value}</Heading>
+        </Flex>
+        
+        <Box className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+          <Box className="lg:col-span-2 space-y-4">
+            <Stack gap={4}>
+              {cart.map((item: CartItem, index: number) => (
+                <Card key={`${item.item_id}-${item.size}-${item.color}-${index}`} className="p-4 flex gap-4 items-center">
+                  {item.image_url ? (
+                    <img src={item.image_url} alt={item.title} className="w-20 h-20 rounded-xl object-cover bg-white/5" />
+                  ) : (
+                    <Box className="w-20 h-20 rounded-xl bg-white/5 flex items-center justify-center">
+                       <ShoppingBag className="w-8 h-8 text-slate-700" />
+                    </Box>
+                  )}
+                  <Box className="flex-1">
+                    <Text weight="bold" color="text-white" size="lg" className="block mb-1">{item.title}</Text>
+                    <Text size="sm" color="text-slate-400" className="block mb-2">
+                      {item.color} {item.size ? `| ${t.size.value}: ${item.size}` : ""}
+                    </Text>
+                    <Flex gap={4} alignItems="center">
+                       <Text weight="black" color="text-[#58a076]">฿{item.price.toLocaleString()}</Text>
+                       <Text size="xs" weight="bold" color="text-slate-500">{t.qty.value}: {item.quantity}</Text>
+                    </Flex>
+                  </Box>
+                  <Button 
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeFromCart(index)}
+                    className="text-slate-500 hover:text-red-500 hover:bg-red-500/10"
+                    title={t.remove.value}
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </Button>
+                </Card>
+              ))}
+            </Stack>
+            
+            <Card variant="glass" className="p-6 mt-8">
+               <Flex justifyContent="between" alignItems="center" className="mb-1">
+                  <Text size="xl" weight="bold" color="text-white">{t.subtotal.value}</Text>
+                  <Text size="2xl" weight="black" color="text-[#58a076]">฿{subtotal.toLocaleString()}</Text>
+               </Flex>
+               <Text size="sm" color="text-slate-400">{t.shippingNotice.value}</Text>
+            </Card>
+          </Box>
 
-        <div className="lg:col-span-1">
-           <LiquidCard className="p-6 sticky top-32">
-              <PreorderForm />
-           </LiquidCard>
-        </div>
-      </div>
-    </div>
+          <Box className="lg:col-span-1">
+             <Card className="p-6 sticky top-32">
+                <PreorderForm />
+             </Card>
+          </Box>
+        </Box>
+      </Container>
+    </Box>
   );
 }

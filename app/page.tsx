@@ -1,139 +1,100 @@
+"use client";
+
 import ItemCard from "@/components/ui/ItemCard";
-import { Item, Site } from "@/types/types";
 import { BRAND_NAME } from "./config";
 import { ShoppingBag, ChevronDown } from "lucide-react";
-import { LiquidButton } from "@/components/ui/LiquidButton";
-import { LiquidCard } from "@/components/ui/LiquidCard";
+import { Box, Card, Heading, Button, Text, Container, Flex, Stack } from "@/components/ui/primitives";
+import { useIntlayer } from "next-intlayer";
+import Link from "next/link";
+import { useAllProducts } from "@/hooks/useProducts";
+import { useSite } from "@/hooks/useSite";
 
-export default async function Home() {
-	const items = await getItems();
-	const site = await getSite();
+export default function Home() {
+	const t = useIntlayer("home");
+	const { data: items } = useAllProducts();
+	const { data: site } = useSite();
+
 	const backgroundImageUrl = site?.image_url || "/images/hero.webp";
 
 	return (
-		<main className="min-h-screen">
+		<Box as="main" className="min-h-screen">
 			{/* Hero Section */}
 			<section className="relative min-h-screen flex items-center justify-center overflow-hidden py-20 px-4">
-				<div 
+				<Box 
 					className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat transition-transform duration-1000 scale-105"
 					style={{ backgroundImage: `url('${backgroundImageUrl}')` }}
 				>
-					<div className="absolute inset-0 bg-[#0a2735]/60 backdrop-blur-[2px]"></div>
-				</div>
+					<Box className="absolute inset-0 bg-[#0a2735]/60 backdrop-blur-[2px]" />
+				</Box>
 
-				<div className="relative z-10 w-full max-w-4xl mx-auto text-center space-y-8">
-					<div className="space-y-4">
-						<h2 className="text-[#58a076] font-bold tracking-[0.2em] uppercase text-sm md:text-base">
-							Welcome to
-						</h2>
-						<h1 className="text-5xl md:text-8xl font-black text-white tracking-tighter drop-shadow-2xl">
-							{BRAND_NAME}
-						</h1>
-					</div>
+				<Container maxWidth="4xl" className="relative z-10 text-center">
+					<Stack gap={8}>
+						<Stack gap={4}>
+							<Text weight="bold" tracking="widest" uppercase size="sm" color="text-[#58a076]">
+								{t.welcome.value}
+							</Text>
+							<Heading level={1} size="4xl" weight="black" color="text-white" className="md:text-8xl tracking-tighter drop-shadow-2xl">
+								{BRAND_NAME}
+							</Heading>
+						</Stack>
 
-					<p className="text-white/70 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed px-4">
-						Explore our exclusive collection of school merchandise designed for the MWIT community.
-					</p>
+						<Text size="lg" color="text-white/70" className="md:text-xl max-w-2xl mx-auto leading-relaxed">
+							{t.description.value}
+						</Text>
 
-					<div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-						<a href="#products">
-							<LiquidButton variant="primary" size="lg" className="gap-2">
-								<ShoppingBag className="w-5 h-5" />
-								SHOP NOW
-							</LiquidButton>
-						</a>
-						<a href="/pre-orders">
-							<LiquidButton variant="secondary" size="lg">
-								View Pre-orders
-							</LiquidButton>
-						</a>
-					</div>
-				</div>
+						<Flex direction="col" className="sm:flex-row justify-center pt-4" gap={4}>
+							<a href="#products">
+								<Button variant="primary" size="lg" className="gap-2">
+									<ShoppingBag className="w-5 h-5" />
+									{t.shopNow.value}
+								</Button>
+							</a>
+							<Link href="/pre-orders">
+								<Button variant="secondary" size="lg">
+									{t.viewPreorders.value}
+								</Button>
+							</Link>
+						</Flex>
+					</Stack>
+				</Container>
 
-				<div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-50 animate-bounce">
-					<span className="text-white text-[10px] uppercase tracking-widest font-bold">Scroll</span>
+				<Box className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-50 animate-bounce">
+					<Text size="xs" weight="bold" uppercase tracking="widest" color="text-white">{t.scroll.value}</Text>
 					<ChevronDown className="w-4 h-4 text-white" />
-				</div>
+				</Box>
 			</section>
 
 			{/* Products Section */}
-			<section id="products" className="container mx-auto px-4 py-32">
-				<div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-4">
-					<div className="space-y-2">
-						<div className="flex items-center gap-2">
-							<div className="w-8 h-[2px] bg-[#58a076]"></div>
-							<span className="text-[#58a076] font-black uppercase tracking-widest text-xs">Collection</span>
-						</div>
-						<h2 className="text-4xl md:text-5xl font-black text-white tracking-tight">
-							NEW ARRIVALS
-						</h2>
-					</div>
-					<p className="text-white/40 max-w-xs text-sm font-medium">
-						Quality materials and unique designs crafted for excellence.
-					</p>
-				</div>
+			<section id="products">
+				<Container maxWidth="full" className="py-32">
+					<Flex direction="col" className="md:flex-row md:items-end justify-between mb-16" gap={4}>
+						<Stack gap={2}>
+							<Flex gap={2} alignItems="center">
+								<Box className="w-8 h-[2px] bg-[#58a076]" />
+								<Text weight="black" uppercase tracking="widest" size="xs" color="text-[#58a076]">{t.collection.value}</Text>
+							</Flex>
+							<Heading level={2} size="4xl" weight="black" color="text-white" className="tracking-tight">
+								{t.newArrivals.value}
+							</Heading>
+						</Stack>
+						<Text size="sm" weight="medium" color="text-white/40" className="max-w-xs">
+							{t.qualityNotice.value}
+						</Text>
+					</Flex>
 
-				{items && items.length > 0 ? (
-					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-						{items.map((item, index) => (
-							<ItemCard key={index} item={item} />
-						))}
-					</div>
-				) : (
-					<LiquidCard variant="glass" className="py-20 text-center">
-						<p className="text-white/60 font-bold text-xl">No products found.</p>
-					</LiquidCard>
-				)}
+					{items && items.length > 0 ? (
+						<Box className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+							{items.map((item, index) => (
+								<ItemCard key={index} item={item} />
+							))}
+						</Box>
+					) : (
+						<Card variant="glass" className="py-20 text-center">
+							<Text weight="bold" size="xl" color="text-white/60">{t.noProducts.value}</Text>
+						</Card>
+					)}
+				</Container>
 			</section>
-		</main>
+		</Box>
 	);
-}
-
-type GetItemsResponse = {
-	errorMessage: string;
-	hasError: boolean;
-	metadata: null | {
-		[key: string]: any;
-	};
-	payload: null | Item[];
-};
-async function getItems() {
-	try {
-		const res = await fetch(`${process.env.API_URL}/api/brand/all`, {
-			next: {
-				revalidate: 0,
-			},
-		});
-		if (!res.ok) throw new Error("Failed to fetch data");
-
-		const data: GetItemsResponse = await res.json();
-		if (data.hasError) throw new Error(data.errorMessage);
-		return data.payload;
-	} catch (error) {
-		return null;
-	}
-}
-
-type GetSiteResponse = {
-	errorMessage: string;
-	hasError: boolean;
-	metadata: null | {
-		[key: string]: any;
-	};
-	payload: Site;
-};
-async function getSite() {
-	try {
-		const res = await fetch(`${process.env.API_URL}/api/site`, {
-			next: {
-				revalidate: 0,
-			},
-		});
-		if (!res.ok) throw new Error("Failed to fetch data");
-		const data: GetSiteResponse = await res.json();
-		if (data.hasError) throw new Error(data.errorMessage);
-		return data.payload;
-	} catch (error) {
-		return null;
-	}
 }
