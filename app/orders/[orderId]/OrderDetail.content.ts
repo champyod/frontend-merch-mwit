@@ -83,6 +83,26 @@ const orderDetailContent: Dictionary = {
 			en: "Order not found.",
 			th: "ไม่พบข้อมูลคำสั่งซื้อ",
 		}),
+		statusPlaced: t({
+			en: "Placed",
+			th: "รับคำสั่งซื้อแล้ว",
+		}),
+		statusConfirmed: t({
+			en: "Confirmed",
+			th: "ยืนยันแล้ว",
+		}),
+		statusPacked: t({
+			en: "Packed",
+			th: "กำลังจัดเตรียม",
+		}),
+		statusShipped: t({
+			en: "Shipped",
+			th: "จัดส่งแล้ว",
+		}),
+		statusDelivered: t({
+			en: "Delivered",
+			th: "จัดส่งสำเร็จ",
+		}),
 	},
 };
 
