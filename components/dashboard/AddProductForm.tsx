@@ -1,17 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
 import { ImagesUpload } from "./ImagesUpload";
 import { BrandInput } from "./BrandInput";
-import { DiscountInput } from "./DiscountInput";
 import { ColorSizeInput } from "./ColorSizeInput";
 import { PageInput } from "./PageInput";
-import { LiquidButton } from "@/components/ui/LiquidButton";
-import { LiquidCard } from "@/components/ui/LiquidCard";
+import { Box, Card, Heading, Button, Stack, Grid, Text } from "@/components/ui/primitives";
 import Link from "next/link";
-import { Loader2, ChevronLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
+import { useIntlayer } from "next-intlayer";
+import { usePaymentAccounts } from "@/hooks/useAdmin";
 
 export interface IFormInputs {
 	title: string;
@@ -34,7 +34,8 @@ export interface IFormInputs {
 
 export function AddProductForm() {
 	const [isLoading, setIsLoading] = useState(false);
-	const [paymentAccounts, setPaymentAccounts] = useState<{id: number, name: string}[]>([]);
+	const t = useIntlayer("dashboard");
+	const { data: paymentAccounts = [] } = usePaymentAccounts();
 
 	const form = useForm<IFormInputs>({
 		defaultValues: {
@@ -42,17 +43,6 @@ export function AddProductForm() {
 			brand: "",
 		},
 	});
-
-	useEffect(() => {
-		const fetchAccounts = async () => {
-			const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/admin/payment-accounts`, {
-				headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
-			});
-			const data = await res.json();
-			setPaymentAccounts(data || []);
-		};
-		fetchAccounts();
-	}, []);
 
 	const onSubmit: SubmitHandler<IFormInputs> = async (formData) => {
 		try {
@@ -74,14 +64,14 @@ export function AddProductForm() {
 
 			const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/admin/products`, {
 				method: "POST",
-				headers: { "Content-Type": "application/json", "Authorization": `Bearer ${localStorage.getItem("token")}` },
+				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(body),
 			});
 
 			const data = await res.json();
-			if (!res.ok) throw new Error(data.errorMessage || "Failed to add product");
+			if (!res.ok) throw new Error(data.errorMessage || t.failedToAdd.value);
 
-			toast.success("Product added successfully");
+			toast.success(t.productAdded.value);
 			form.reset();
 		} catch (error: any) {
 			toast.error(error.message);
@@ -90,86 +80,103 @@ export function AddProductForm() {
 		}
 	};
 
-	const salePrice =
-		form.watch("discount_type") === "dollar"
-			? form.watch("price") - form.watch("discount")
-			: form.watch("price") - (form.watch("discount") / 100) * form.watch("price");
-
 	return (
-		<form onSubmit={form.handleSubmit(onSubmit)} className="max-w-4xl mx-auto space-y-6 pb-20">
-			<Link href="/dashboard/products" className="flex items-center text-slate-400 hover:text-white transition-colors">
-				<ChevronLeft className="w-4 h-4 mr-1" /> Back to Products
-			</Link>
-			
-			<div className="flex justify-between items-center">
-				<h1 className="text-3xl font-bold text-white">Add New Product</h1>
-				<LiquidButton type="submit" disabled={isLoading}>
-					{isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Publish Product"}
-				</LiquidButton>
-			</div>
+		<form onSubmit={form.handleSubmit(onSubmit)}>
+			<Stack gap={6} className="max-w-4xl mx-auto pb-20">
+				<Link href="/dashboard/products" className="flex items-center text-slate-400 hover:text-white transition-colors text-sm font-bold">
+					<ChevronLeft className="w-4 h-4 mr-1" /> {t.backToProducts.value}
+				</Link>
+				
+				<Box className="flex justify-between items-center">
+					<Heading level={1} size="3xl" color="text-white">{t.addProductTitle.value}</Heading>
+					<Button type="submit" isLoading={isLoading}>
+						{t.publishProduct.value}
+					</Button>
+				</Box>
 
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-				<div className="space-y-6">
-					<LiquidCard className="p-6 space-y-4">
-						<h2 className="text-xl font-bold text-white border-b border-white/10 pb-2">Basic Info</h2>
-						<div className="space-y-2">
-							<label className="text-sm font-medium text-slate-400">Product Title*</label>
-							<input {...form.register("title", { required: true })} className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50" placeholder="e.g. 2026 Anniversary Tee" />
-						</div>
-						<div className="grid grid-cols-2 gap-4">
-							<div className="space-y-2">
-								<label className="text-sm font-medium text-slate-400">Price (THB)*</label>
-								<input type="number" {...form.register("price", { required: true })} className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50" />
-							</div>
-							<div className="space-y-2">
-								<label className="text-sm font-medium text-slate-400">Brand*</label>
-								<BrandInput form={form} />
-							</div>
-						</div>
-						<div className="space-y-2">
-							<label className="text-sm font-medium text-slate-400">Linking Payment Account*</label>
-							<select 
-								{...form.register("payment_account_id", { required: true })}
-								className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 appearance-none"
-							>
-								<option value="" className="bg-slate-900">Select Account</option>
-								{paymentAccounts.map(acc => (
-									<option key={acc.id} value={acc.id} className="bg-slate-900">{acc.name}</option>
-								))}
-							</select>
-						</div>
-					</LiquidCard>
+				<Grid cols={1} className="md:grid-cols-2" gap={6}>
+					<Stack gap={6}>
+						<Card className="p-6">
+							<Stack gap={4}>
+								<Heading level={2} size="lg" color="text-white" className="border-b border-white/10 pb-2">
+									{t.basicInfo.value}
+								</Heading>
+								<Stack gap={2}>
+									<label className="text-sm font-medium text-slate-400">{t.productTitle.value}</label>
+									<input 
+										{...form.register("title", { required: true })} 
+										className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#58a076]/50 transition-all" 
+										placeholder={t.productTitlePlaceholder.value} 
+									/>
+								</Stack>
+								<Grid cols={2} gap={4}>
+									<Stack gap={2}>
+										<label className="text-sm font-medium text-slate-400">{t.priceThb.value}</label>
+										<input 
+											type="number" 
+											{...form.register("price", { required: true })} 
+											className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#58a076]/50 transition-all" 
+										/>
+									</Stack>
+									<Stack gap={2}>
+										<label className="text-sm font-medium text-slate-400">{t.brand.value}</label>
+										<BrandInput form={form} />
+									</Stack>
+								</Grid>
+								<Stack gap={2}>
+									<label className="text-sm font-medium text-slate-400">{t.paymentAccount.value}</label>
+									<select 
+										{...form.register("payment_account_id", { required: true })}
+										className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#58a076]/50 appearance-none cursor-pointer"
+									>
+										<option value="" className="bg-[#0a2735]">{t.selectAccount.value}</option>
+										{paymentAccounts.map((acc: { id: number; name: string }) => (
+											<option key={acc.id} value={acc.id} className="bg-[#0a2735]">{acc.name}</option>
+										))}
+									</select>
+								</Stack>
+							</Stack>
+						</Card>
 
-					<LiquidCard className="p-6 space-y-4">
-						<h2 className="text-xl font-bold text-white border-b border-white/10 pb-2">Inventory & Logic</h2>
-						<div className="flex gap-6">
-							<label className="flex items-center gap-2 cursor-pointer">
-								<input type="checkbox" {...form.register("isPreorder")} className="w-4 h-4 rounded border-white/10 bg-white/5 text-emerald-500" />
-								<span className="text-sm text-white">Pre-order Item</span>
-							</label>
-							<label className="flex items-center gap-2 cursor-pointer">
-								<input type="checkbox" {...form.register("hidden")} className="w-4 h-4 rounded border-white/10 bg-white/5 text-emerald-500" />
-								<span className="text-sm text-white">Hidden</span>
-							</label>
-						</div>
-						<div className="space-y-2">
-							<label className="text-sm font-medium text-slate-400">Choose Page Location</label>
-							<PageInput form={form} />
-						</div>
-					</LiquidCard>
-				</div>
+						<Card className="p-6">
+							<Stack gap={4}>
+								<Heading level={2} size="lg" color="text-white" className="border-b border-white/10 pb-2">
+									{t.inventoryLogic.value}
+								</Heading>
+								<Box className="flex gap-6">
+									<label className="flex items-center gap-2 cursor-pointer group">
+										<input type="checkbox" {...form.register("isPreorder")} className="w-4 h-4 rounded border-white/10 bg-white/5 text-[#58a076] focus:ring-offset-0 focus:ring-0" />
+										<Text size="sm" color="text-white" className="group-hover:text-[#58a076] transition-colors">{t.preorderItem.value}</Text>
+									</label>
+									<label className="flex items-center gap-2 cursor-pointer group">
+										<input type="checkbox" {...form.register("hidden")} className="w-4 h-4 rounded border-white/10 bg-white/5 text-[#58a076] focus:ring-offset-0 focus:ring-0" />
+										<Text size="sm" color="text-white" className="group-hover:text-[#58a076] transition-colors">{t.hidden.value}</Text>
+									</label>
+								</Box>
+								<Stack gap={2}>
+									<label className="text-sm font-medium text-slate-400">{t.pageLocation.value}</label>
+									<PageInput form={form} />
+								</Stack>
+							</Stack>
+						</Card>
+					</Stack>
 
-				<div className="space-y-6">
-					<LiquidCard className="p-6 space-y-4">
-						<h2 className="text-xl font-bold text-white border-b border-white/10 pb-2">Images & Variants</h2>
-						<ImagesUpload form={form} />
-						<div className="pt-4">
-							<label className="text-sm font-medium text-slate-400 mb-2 block">Colors & Sizes</label>
-							<ColorSizeInput form={form} />
-						</div>
-					</LiquidCard>
-				</div>
-			</div>
+					<Stack gap={6}>
+						<Card className="p-6">
+							<Stack gap={4}>
+								<Heading level={2} size="lg" color="text-white" className="border-b border-white/10 pb-2">
+									{t.imagesVariants.value}
+								</Heading>
+								<ImagesUpload form={form} />
+								<Stack gap={2} className="pt-4">
+									<label className="text-sm font-medium text-slate-400">{t.colorsSizes.value}</label>
+									<ColorSizeInput form={form} />
+								</Stack>
+							</Stack>
+						</Card>
+					</Stack>
+				</Grid>
+			</Stack>
 		</form>
 	);
 }

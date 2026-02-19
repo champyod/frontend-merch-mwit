@@ -11,6 +11,9 @@ import { InfoStep } from "./InfoStep";
 import { PaymentStep } from "./PaymentStep";
 import { SuccessStep } from "./SuccessStep";
 
+import { useSubmitPreorder } from "@/hooks/useOrders";
+import { calculateCartSubtotal, calculateShippingCost } from "@/lib/logic";
+
 export interface IFormInputs {
   name: string;
   social: string;
@@ -24,8 +27,8 @@ type Step = 'info' | 'payment' | 'success';
 export default function PreorderForm() {
   const { cart, clearCart } = useCart();
   const [step, setStep] = useState<Step>('info');
-  const [isLoading, setIsLoading] = useState(false);
   const [preorderId, setPreorderId] = useState<number | null>(null);
+  const submitMutation = useSubmitPreorder();
 
   const methods = useForm<IFormInputs>({
     defaultValues: {
@@ -35,8 +38,8 @@ export default function PreorderForm() {
 
   const { watch, handleSubmit } = methods;
   const shippingMethod = watch("shipping_method");
-  const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const shippingCost = shippingMethod === "postal" ? 50 : 0;
+  const subtotal = calculateCartSubtotal(cart);
+  const shippingCost = calculateShippingCost(shippingMethod);
   const totalPrice = subtotal + shippingCost;
 
   const onInfoSubmit: SubmitHandler<IFormInputs> = async (data) => {
@@ -49,7 +52,6 @@ export default function PreorderForm() {
 
   const handleFinalSubmit = async (file: File) => {
     try {
-      setIsLoading(true);
       const formData = new FormData();
       const info = watch();
       
@@ -66,21 +68,13 @@ export default function PreorderForm() {
       }))));
       formData.append("slip", file);
 
-      const response = await fetch(`${API_BASE_URL}/api/preorders`, {
-        method: "POST",
-        body: formData,
-      });
-      
-      const resData = await response.json();
-      if (!response.ok) throw new Error(resData.error || "Error submitting order");
+      const resData = await submitMutation.mutateAsync(formData);
 
       setPreorderId(resData.preorder.id);
       setStep('success');
       clearCart();
     } catch (error: any) {
       toast.error(error.message);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -91,7 +85,7 @@ export default function PreorderForm() {
           {step === 'info' && (
             <InfoStep 
               key="info"
-              isLoading={isLoading} 
+              isLoading={submitMutation.isPending} 
               onSubmit={handleSubmit(onInfoSubmit)} 
               totalPrice={totalPrice}
             />
@@ -99,7 +93,7 @@ export default function PreorderForm() {
           {step === 'payment' && (
              <PaymentStep 
                key="payment"
-               isLoading={isLoading}
+               isLoading={submitMutation.isPending}
                totalPrice={totalPrice}
                onBack={() => setStep('info')}
                onUpload={handleFinalSubmit}

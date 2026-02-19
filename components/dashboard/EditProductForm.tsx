@@ -1,19 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
 import { ImagesUpload } from "./ImagesUpload";
 import { BrandInput } from "./BrandInput";
-import { DiscountInput } from "./DiscountInput";
 import { ColorSizeInput } from "./ColorSizeInput";
 import { PageInput } from "./PageInput";
-import { LiquidButton } from "@/components/ui/LiquidButton";
-import { LiquidCard } from "@/components/ui/LiquidCard";
+import { Box, Card, Heading, Button, Stack, Grid, Text } from "@/components/ui/primitives";
 import { Item } from "@/types/types";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Loader2, ChevronLeft, Trash2 } from "lucide-react";
+import { ChevronLeft, Trash2 } from "lucide-react";
+import { useIntlayer } from "next-intlayer";
+import { usePaymentAccounts } from "@/hooks/useAdmin";
 
 export interface IFormInputs {
 	title: string;
@@ -37,7 +37,8 @@ export interface IFormInputs {
 export function EditProductForm({ product }: { product: Item }) {
 	const router = useRouter();
 	const [isLoading, setIsLoading] = useState(false);
-	const [paymentAccounts, setPaymentAccounts] = useState<{id: number, name: string}[]>([]);
+	const t = useIntlayer("dashboard");
+	const { data: paymentAccounts = [] } = usePaymentAccounts();
 
 	const form = useForm<IFormInputs>({
 		defaultValues: {
@@ -55,17 +56,6 @@ export function EditProductForm({ product }: { product: Item }) {
 			payment_account_id: product.payment_account_id?.toString() || "",
 		},
 	});
-
-	useEffect(() => {
-		const fetchAccounts = async () => {
-			const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/admin/payment-accounts`, {
-				headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
-			});
-			const data = await res.json();
-			setPaymentAccounts(data || []);
-		};
-		fetchAccounts();
-	}, []);
 
 	const onSubmit: SubmitHandler<IFormInputs> = async (formData) => {
 		try {
@@ -87,12 +77,12 @@ export function EditProductForm({ product }: { product: Item }) {
 
 			const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/admin/products/${product.id}`, {
 				method: "PUT",
-				headers: { "Content-Type": "application/json", "Authorization": `Bearer ${localStorage.getItem("token")}` },
+				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(body),
 			});
 
-			if (!res.ok) throw new Error("Failed to update product");
-			toast.success("Product updated successfully");
+			if (!res.ok) throw new Error(t.failedToUpdate.value);
+			toast.success(t.productUpdated.value);
 		} catch (error: any) {
 			toast.error(error.message);
 		} finally {
@@ -101,13 +91,12 @@ export function EditProductForm({ product }: { product: Item }) {
 	};
 
 	const deleteProduct = async () => {
-		if (!confirm("Are you sure?")) return;
+		if (!confirm(t.deleteConfirm.value)) return;
 		try {
 			await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/admin/products/${product.id}`, {
 				method: "DELETE",
-				headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
 			});
-			toast.success("Product deleted");
+			toast.success(t.productDeleted.value);
 			router.push("/dashboard/products");
 		} catch (e) {
 			toast.error("Delete failed");
@@ -115,70 +104,109 @@ export function EditProductForm({ product }: { product: Item }) {
 	};
 
 	return (
-		<form onSubmit={form.handleSubmit(onSubmit)} className="max-w-4xl mx-auto space-y-6 pb-20">
-			<Link href="/dashboard/products" className="flex items-center text-slate-400 hover:text-white transition-colors">
-				<ChevronLeft className="w-4 h-4 mr-1" /> Back to Products
-			</Link>
-			
-			<div className="flex justify-between items-center">
-				<div>
-					<h1 className="text-3xl font-bold text-white">Edit Product</h1>
-					<p className="text-sm text-slate-500">Editing: {product.title}</p>
-				</div>
-				<div className="flex gap-3">
-					<LiquidButton variant="outline" className="text-red-500 border-red-500/20" onClick={deleteProduct}>
-						<Trash2 className="w-4 h-4 mr-2" /> Delete
-					</LiquidButton>
-					<LiquidButton type="submit" disabled={isLoading}>
-						{isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Save Changes"}
-					</LiquidButton>
-				</div>
-			</div>
+		<form onSubmit={form.handleSubmit(onSubmit)}>
+			<Stack gap={6} className="max-w-4xl mx-auto pb-20">
+				<Link href="/dashboard/products" className="flex items-center text-slate-400 hover:text-white transition-colors text-sm font-bold">
+					<ChevronLeft className="w-4 h-4 mr-1" /> {t.backToProducts.value}
+				</Link>
+				
+				<Box className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+					<Box>
+						<Heading level={1} size="3xl" color="text-white">{t.editProductTitle.value}</Heading>
+						<Text size="sm" color="text-slate-500">{t.editing.value} {product.title}</Text>
+					</Box>
+					<Box className="flex gap-3">
+						<Button variant="danger" size="md" onClick={deleteProduct}>
+							<Trash2 className="w-4 h-4 mr-2" /> {t.delete.value}
+						</Button>
+						<Button type="submit" isLoading={isLoading}>
+							{t.saveChanges.value}
+						</Button>
+					</Box>
+				</Box>
 
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-				<div className="space-y-6">
-					<LiquidCard className="p-6 space-y-4">
-						<h2 className="text-xl font-bold text-white border-b border-white/10 pb-2">Basic Info</h2>
-						<div className="space-y-2">
-							<label className="text-sm font-medium text-slate-400">Product Title*</label>
-							<input {...form.register("title", { required: true })} className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50" />
-						</div>
-						<div className="grid grid-cols-2 gap-4">
-							<div className="space-y-2">
-								<label className="text-sm font-medium text-slate-400">Price (THB)*</label>
-								<input type="number" {...form.register("price", { required: true })} className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50" />
-							</div>
-							<div className="space-y-2">
-								<label className="text-sm font-medium text-slate-400">Brand*</label>
-								<BrandInput form={form} />
-							</div>
-						</div>
-						<div className="space-y-2">
-							<label className="text-sm font-medium text-slate-400">Linking Payment Account*</label>
-							<select 
-								{...form.register("payment_account_id", { required: true })}
-								className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 appearance-none"
-							>
-								<option value="" className="bg-slate-900">Select Account</option>
-								{paymentAccounts.map(acc => (
-									<option key={acc.id} value={acc.id} className="bg-slate-900">{acc.name}</option>
-								))}
-							</select>
-						</div>
-					</LiquidCard>
-				</div>
+				<Grid cols={1} className="md:grid-cols-2" gap={6}>
+					<Stack gap={6}>
+						<Card className="p-6">
+							<Stack gap={4}>
+								<Heading level={2} size="lg" color="text-white" className="border-b border-white/10 pb-2">
+									{t.basicInfo.value}
+								</Heading>
+								<Stack gap={2}>
+									<label className="text-sm font-medium text-slate-400">{t.productTitle.value}</label>
+									<input 
+										{...form.register("title", { required: true })} 
+										className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#58a076]/50 transition-all" 
+									/>
+								</Stack>
+								<Grid cols={2} gap={4}>
+									<Stack gap={2}>
+										<label className="text-sm font-medium text-slate-400">{t.priceThb.value}</label>
+										<input 
+											type="number" 
+											{...form.register("price", { required: true })} 
+											className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#58a076]/50 transition-all" 
+										/>
+									</Stack>
+									<Stack gap={2}>
+										<label className="text-sm font-medium text-slate-400">{t.brand.value}</label>
+										<BrandInput form={form} />
+									</Stack>
+								</Grid>
+								<Stack gap={2}>
+									<label className="text-sm font-medium text-slate-400">{t.paymentAccount.value}</label>
+									<select 
+										{...form.register("payment_account_id", { required: true })}
+										className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#58a076]/50 appearance-none cursor-pointer"
+									>
+										<option value="" className="bg-[#0a2735]">{t.selectAccount.value}</option>
+										{paymentAccounts.map((acc: { id: number; name: string }) => (
+											<option key={acc.id} value={acc.id} className="bg-[#0a2735]">{acc.name}</option>
+										))}
+									</select>
+								</Stack>
+							</Stack>
+						</Card>
 
-				<div className="space-y-6">
-					<LiquidCard className="p-6 space-y-4">
-						<h2 className="text-xl font-bold text-white border-b border-white/10 pb-2">Images & Variants</h2>
-						<ImagesUpload form={form} />
-						<div className="pt-4">
-							<label className="text-sm font-medium text-slate-400 mb-2 block">Colors & Sizes</label>
-							<ColorSizeInput form={form} />
-						</div>
-					</LiquidCard>
-				</div>
-			</div>
+						<Card className="p-6">
+							<Stack gap={4}>
+								<Heading level={2} size="lg" color="text-white" className="border-b border-white/10 pb-2">
+									{t.inventoryLogic.value}
+								</Heading>
+								<Box className="flex gap-6">
+									<label className="flex items-center gap-2 cursor-pointer group">
+										<input type="checkbox" {...form.register("isPreorder")} className="w-4 h-4 rounded border-white/10 bg-white/5 text-[#58a076] focus:ring-offset-0 focus:ring-0" />
+										<Text size="sm" color="text-white" className="group-hover:text-[#58a076] transition-colors">{t.preorderItem.value}</Text>
+									</label>
+									<label className="flex items-center gap-2 cursor-pointer group">
+										<input type="checkbox" {...form.register("hidden")} className="w-4 h-4 rounded border-white/10 bg-white/5 text-[#58a076] focus:ring-offset-0 focus:ring-0" />
+										<Text size="sm" color="text-white" className="group-hover:text-[#58a076] transition-colors">{t.hidden.value}</Text>
+									</label>
+								</Box>
+								<Stack gap={2}>
+									<label className="text-sm font-medium text-slate-400">{t.pageLocation.value}</label>
+									<PageInput form={form} />
+								</Stack>
+							</Stack>
+						</Card>
+					</Stack>
+
+					<Stack gap={6}>
+						<Card className="p-6">
+							<Stack gap={4}>
+								<Heading level={2} size="lg" color="text-white" className="border-b border-white/10 pb-2">
+									{t.imagesVariants.value}
+								</Heading>
+								<ImagesUpload form={form} />
+								<Stack gap={2} className="pt-4">
+									<label className="text-sm font-medium text-slate-400">{t.colorsSizes.value}</label>
+									<ColorSizeInput form={form} />
+								</Stack>
+							</Stack>
+						</Card>
+					</Stack>
+				</Grid>
+			</Stack>
 		</form>
 	);
 }
