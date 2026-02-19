@@ -1,81 +1,40 @@
+"use client";
+
 import ItemCard from "@/components/ui/ItemCard";
-import { Item } from "@/types/types";
-import { Metadata } from "next";
-import { BRAND_NAME, BRAND_URL, SITE_DESCRIPTION } from "../config";
+import { useSaleItems } from "@/hooks/useProducts";
+import { Box, Container, Grid, Heading, Text, Card } from "@/components/ui/primitives";
+import Loader from "@/components/ui/Loader";
 
-export const dynamic = "force-dynamic";
-export async function generateMetadata(): Promise<Metadata> {
-	return {
-		title: "Sales",
-		description: SITE_DESCRIPTION,
-		metadataBase: new URL(BRAND_URL),
-		openGraph: {
-			title: `Home | ${BRAND_NAME}`,
-			description: SITE_DESCRIPTION,
-			url: BRAND_URL,
-			siteName: `${BRAND_NAME}`,
-			images: [
-				{
-					url: "/images/hero.webp",
-					width: 512,
-					height: 512,
-				},
-			],
-			locale: "en-US",
-			type: "website",
-		},
-	};
-}
+export default function SalesPage() {
+	const { data: items, isLoading } = useSaleItems();
 
-type GetItemsResponse = {
-	errorMessage: string;
-	hasError: boolean;
-	metadata: null | {
-		[key: string]: any;
-	};
-	payload: null | Item[];
-};
-
-export default async function SalesPage() {
-	const items = await getItems();
-
-	if (!items || items.length === 0)
-		return (
-			<div className="min-h-screen bg-secondary pt-10">
-				<section className="p-20">
-					<h2 className="text-4xl mb-5 font-bold">Sales</h2>
-					<p className="text-xl">Nothing to see yet!</p>
-				</section>
-			</div>
-		);
+	if (isLoading) return (
+		<Box className="min-h-screen flex items-center justify-center pt-32">
+			<Loader />
+		</Box>
+	);
 
 	return (
-		<div className="bg-secondary pt-10">
-			<section className="p-20">
-				<h2 className="text-4xl mb-5 font-bold">Sales</h2>
-				<div className="flex flex-wrap">
-					{items.map((item, index) => (
-						<ItemCard key={index} item={item} />
-					))}
-				</div>
-			</section>
-		</div>
+		<Box className="min-h-screen pt-32 pb-20 px-4">
+			<Container maxWidth="full">
+				<Box className="mb-16">
+					<Heading level={1} size="4xl" weight="black" color="text-white" className="uppercase tracking-tight">
+						SALES & OFFERS
+					</Heading>
+				</Box>
+
+				{items && items.length > 0 ? (
+					<Grid cols={1} className="sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" gap={8}>
+						{items.map((item, index) => (
+							<ItemCard key={index} item={item} />
+						))}
+					</Grid>
+				) : (
+					<Card variant="glass" className="py-20 text-center">
+						<Text weight="bold" size="xl" color="text-white/60">No discounted items found.</Text>
+					</Card>
+				)}
+			</Container>
+		</Box>
 	);
-}
-
-async function getItems() {
-	try {
-		const res = await fetch(`${process.env.API_URL}/api/brand/sales`, {
-			next: {
-				revalidate: 0,
-			},
-		});
-		if (!res.ok) throw new Error("Failed to fetch data");
-
-		const data: GetItemsResponse = await res.json();
-		if (data.hasError) throw new Error(data.errorMessage);
-		return data.payload;
-	} catch (error) {
-		return null;
-	}
 }

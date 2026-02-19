@@ -8,6 +8,8 @@ import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 
+import { Box } from "@/components/ui/primitives";
+
 const queryClient = new QueryClient();
 
 export default function DahboardRootLayout({
@@ -29,10 +31,10 @@ export default function DahboardRootLayout({
 	return (
 		<QueryClientProvider client={queryClient}>
 			<AppHeaderBar />
-			<div className="min-h-screen bg-secondary px-10 pb-10 pt-32">
+			<Box className="min-h-screen bg-[#0a2735] px-4 md:px-10 pb-10 pt-32">
 				<Toaster richColors closeButton />
 				{children}
-			</div>
+			</Box>
 		</QueryClientProvider>
 	);
 }

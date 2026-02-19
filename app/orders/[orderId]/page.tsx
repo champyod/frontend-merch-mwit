@@ -10,16 +10,16 @@ import { ChevronLeft, Package, MapPin, Phone, CreditCard, Mail, ExternalLink, Ca
 import Link from "next/link";
 import Image from "next/image";
 import { useIntlayer } from "next-intlayer";
-import { Flex, Stack, Text, Heading, Container, Box } from "@/components/ui/primitives";
-import { LiquidCard } from "@/components/ui/LiquidCard";
+import { Flex, Stack, Text, Heading, Container, Box, Card, Button } from "@/components/ui/primitives";
+import { useMyOrder } from "@/hooks/useOrders";
 
 export default function OrderDetailPage() {
-	const { user, isLoading } = useAuth();
-	const router = useRouter();
+	const { user, isLoading: isAuthLoading } = useAuth();
 	const params = useParams();
-	const orderId = params.orderId;
-	const [order, setOrder] = useState<Preorder | null>(null);
-	const [isFetching, setIsFetching] = useState(true);
+	const orderId = params.orderId as string;
+	
+	const { data: order, isLoading: isFetching } = useMyOrder(orderId, !!user);
+
 	const {
 		backToOrders,
 		orderNumber,
@@ -43,31 +43,12 @@ export default function OrderDetailPage() {
 		orderNotFound
 	} = useIntlayer("order-detail");
 
-	useEffect(() => {
-		if (!isLoading && !user) {
-			router.push("/");
-			return;
-		}
-
-		if (user && orderId) {
-			fetch(`/api/me/orders/${orderId}`)
-				.then((res) => res.json())
-				.then((data) => {
-					if (!data.hasError) {
-						setOrder(data.payload);
-					}
-				})
-				.catch((err) => console.error("Error fetching order:", err))
-				.finally(() => setIsFetching(false));
-		}
-	}, [user, isLoading, orderId, router]);
-
-	if (isLoading || (isFetching && user)) return <Loader />;
+	if (isAuthLoading || (isFetching && user)) return <Loader />;
 	
 	if (!order) {
 		return (
 			<Flex className="min-h-screen bg-[#0a2735]" justifyContent="center" alignItems="center">
-				<Text weight="bold" color="text-white">{orderNotFound}</Text>
+				<Text weight="bold" color="text-white">{orderNotFound.value}</Text>
 			</Flex>
 		);
 	}
@@ -91,14 +72,14 @@ export default function OrderDetailPage() {
 					className="inline-flex items-center gap-2 text-white/40 hover:text-white font-bold transition-colors mb-8"
 				>
 					<ChevronLeft className="w-5 h-5" />
-					{backToOrders}
+					{backToOrders.value}
 				</Link>
 
 				<Flex className="flex-col md:flex-row mb-10" justifyContent="between" alignItems="end" gap={6}>
 					<Stack gap={2}>
 						<Flex gap={3}>
 							<Heading level={1} size="4xl" className="text-white">
-								{orderNumber}{order.id}
+								{orderNumber.value}{order.id}
 							</Heading>
 							<Box className={`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${getStatusColor(order.status)}`}>
 								{order.status}
@@ -112,15 +93,15 @@ export default function OrderDetailPage() {
 					<Flex gap={3}>
 						<Box className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-white/5 border border-white/10 text-white/60 text-sm font-bold hover:bg-white/10 transition-all cursor-pointer">
 							<Receipt className="w-4 h-4" />
-							{viewInvoice}
+							{viewInvoice.value}
 						</Box>
 					</Flex>
 				</Flex>
 
 				{/* Status Stepper Card */}
-				<LiquidCard className="p-8 md:p-12 mb-8 shadow-2xl">
+				<Card className="p-8 md:p-12 mb-8 shadow-2xl">
 					<Heading level={2} size="lg" className="text-white mb-12 text-center">
-						{trackProgress}
+						{trackProgress.value}
 					</Heading>
 					<OrderStatusStepper currentStatus={order.status} />
 					
@@ -129,32 +110,31 @@ export default function OrderDetailPage() {
 							<Flex className="flex-col md:flex-row" justifyContent="between" alignItems="center" gap={6}>
 								<Stack gap={1}>
 									<Text size="xs" weight="bold" color="text-white/40" uppercase tracking="widest" className="text-center md:text-left">
-										{trackingNumber}
+										{trackingNumber.value}
 									</Text>
 									<Text size="2xl" weight="black" color="text-[#58a076]" className="text-center md:text-left">
 										{order.tracking_no}
 									</Text>
 								</Stack>
-								<Box 
-									as="a"
+								<Link 
 									href="#"
 									className="flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-[#58a076]/10 text-[#58a076] font-bold border border-[#58a076]/20 hover:bg-[#58a076]/20 transition-all group"
 								>
-									{trackShipment}
+									{trackShipment.value}
 									<ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-								</Box>
+								</Link>
 							</Flex>
 						</Box>
 					)}
-				</LiquidCard>
+				</Card>
 
 				<Box className="grid grid-cols-1 md:grid-cols-3 gap-8">
 					{/* Order Items */}
 					<Box className="md:col-span-2 space-y-6">
-						<LiquidCard className="p-8 shadow-xl">
+						<Card className="p-8 shadow-xl">
 							<Heading level={3} size="lg" className="text-white mb-6 flex items-center gap-3">
 								<Package className="w-5 h-5 text-[#58a076]" />
-								{orderSummary}
+								{orderSummary.value}
 							</Heading>
 							<Stack gap={6}>
 								{order.items.map((item, idx) => (
@@ -187,24 +167,24 @@ export default function OrderDetailPage() {
 
 							<Box className="mt-8 pt-8 border-t border-white/5 space-y-4">
 								<Flex justifyContent="between">
-									<Text size="sm" weight="bold" color="text-white/40">{subtotal}</Text>
+									<Text size="sm" weight="bold" color="text-white/40">{subtotal.value}</Text>
 									<Text size="sm" color="text-white">฿{(order.total_price - order.shipping_cost).toLocaleString()}</Text>
 								</Flex>
 								<Flex justifyContent="between">
-									<Text size="sm" weight="bold" color="text-white/40">{shippingCost}</Text>
+									<Text size="sm" weight="bold" color="text-white/40">{shippingCost.value}</Text>
 									<Text size="sm" color="text-white">฿{order.shipping_cost.toLocaleString()}</Text>
 								</Flex>
 								<Flex justifyContent="between" alignItems="end" className="pt-2">
-									<Text size="lg" weight="bold" color="text-white">{total}</Text>
-									<Text size="3xl" weight="black" color="text-[#58a076]">฿{order.total_price.toLocaleString()}</Text>
+									<Text size="lg" weight="bold" color="text-white">{total.value}</Text>
+									<Heading level={4} size="3xl" weight="black" color="text-[#58a076]">฿{order.total_price.toLocaleString()}</Heading>
 								</Flex>
 							</Box>
-						</LiquidCard>
+						</Card>
 
 						{order.note && (
 							<Box className="bg-[#58a076]/5 border border-[#58a076]/20 rounded-3xl p-6">
 								<Text size="xs" weight="black" color="text-[#58a076]" uppercase tracking="widest" className="block mb-3">
-									{adminNote}
+									{adminNote.value}
 								</Text>
 								<Text size="sm" color="text-white/80" className="leading-relaxed italic">
 									"{order.note}"
@@ -215,50 +195,50 @@ export default function OrderDetailPage() {
 
 					{/* Customer & Shipping Info */}
 					<Stack gap={6}>
-						<LiquidCard className="p-8 shadow-xl">
+						<Card className="p-8 shadow-xl">
 							<Heading level={3} size="lg" className="text-white mb-6 flex items-center gap-3">
 								<User className="w-5 h-5 text-[#58a076]" />
-								{customer}
+								{customer.value}
 							</Heading>
 							<Stack gap={4}>
 								<Stack gap={1}>
-									<Text size="xs" weight="bold" color="text-white/20" uppercase tracking="widest">{nameLabel}</Text>
+									<Text size="xs" weight="bold" color="text-white/20" uppercase tracking="widest">{nameLabel.value}</Text>
 									<Text size="sm" weight="bold" color="text-white">{order.customer_name}</Text>
 								</Stack>
 								<Stack gap={1}>
-									<Text size="xs" weight="bold" color="text-white/20" uppercase tracking="widest">{socialLabel}</Text>
+									<Text size="xs" weight="bold" color="text-white/20" uppercase tracking="widest">{socialLabel.value}</Text>
 									<Text size="sm" weight="bold" color="text-white">{order.social}</Text>
 								</Stack>
 								<Stack gap={1}>
-									<Text size="xs" weight="bold" color="text-white/20" uppercase tracking="widest">{contactLabel}</Text>
+									<Text size="xs" weight="bold" color="text-white/20" uppercase tracking="widest">{contactLabel.value}</Text>
 									<Flex gap={2}>
 										<Phone className="w-3.5 h-3.5 text-[#58a076]" />
 										<Text size="sm" weight="bold" color="text-white">{order.contact_number}</Text>
 									</Flex>
 								</Stack>
 							</Stack>
-						</LiquidCard>
+						</Card>
 
-						<LiquidCard className="p-8 shadow-xl">
+						<Card className="p-8 shadow-xl">
 							<Heading level={3} size="lg" className="text-white mb-6 flex items-center gap-3">
 								<MapPin className="w-5 h-5 text-[#58a076]" />
-								{shipping}
+								{shipping.value}
 							</Heading>
 							<Stack gap={4}>
 								<Stack gap={1}>
-									<Text size="xs" weight="bold" color="text-white/20" uppercase tracking="widest">{method}</Text>
+									<Text size="xs" weight="bold" color="text-white/20" uppercase tracking="widest">{method.value}</Text>
 									<Box className="w-fit px-2.5 py-1 rounded-lg bg-white/5 text-[10px] font-black text-[#58a076] uppercase tracking-widest">
 										{order.shipping_method}
 									</Box>
 								</Stack>
 								<Stack gap={1}>
-									<Text size="xs" weight="bold" color="text-white/20" uppercase tracking="widest">{address}</Text>
+									<Text size="xs" weight="bold" color="text-white/20" uppercase tracking="widest">{address.value}</Text>
 									<Text size="sm" weight="bold" color="text-white/70" className="leading-relaxed">
-										{order.address || noAddress}
+										{order.address || noAddress.value}
 									</Text>
 								</Stack>
 							</Stack>
-						</LiquidCard>
+						</Card>
 					</Stack>
 				</Box>
 			</Container>

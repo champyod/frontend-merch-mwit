@@ -4,137 +4,67 @@ import Loader from "@/components/ui/Loader";
 import TextLoader from "@/components/ui/TextLoader";
 import useRedirect from "@/hooks/useRedirect";
 import { Item } from "@/types/types";
-import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState } from "react";
-
-type GetProductsResponse = {
-	errorMessage: string;
-	hasError: boolean;
-	metadata: null | {
-		[key: string]: any;
-	};
-	payload: Item[];
-};
-type GetBrandResponse = {
-	payload: { name: string }[];
-};
+import { useProducts } from "@/hooks/useProducts";
+import { useBrands } from "@/hooks/useAdmin";
+import { Box, Card, Heading, Text, Button, Stack, Container, Flex, Grid, Badge } from "@/components/ui/primitives";
+import { calculateSalePrice } from "@/lib/logic";
 
 export default function ProductsPage() {
-	const { data: userData } = useRedirect({});
-
+	const { user, isLoading: isAuthLoading } = useRedirect({});
 	const [brandName, setBrandName] = useState("");
-	const { data: productResponse } = useQuery<
-		any,
-		any,
-		GetProductsResponse,
-		any
-	>({
-		queryKey: ["products", brandName],
-		queryFn: async () => {
-			if (!userData?.payload.isAuthenticated) return;
-			const res = await fetch(`/api/product?brandName=${brandName}`);
-			const data = await res.json();
-			return data;
-		},
-	});
 
-	const { data: brandResponse } = useQuery<any, any, GetBrandResponse, any>({
-		queryKey: ["brands", userData?.payload.isAuthenticated],
-		queryFn: async () => {
-			if (!userData?.payload.isAuthenticated) return;
-			const res = await fetch(`/api/brand`);
-			const data = await res.json();
-			return data;
-		},
-	});
+	const { data: products = [] } = useProducts(brandName);
+	const { data: brands = [] } = useBrands(!!user);
 
-	if (!userData || !userData.payload.isAuthenticated) return <Loader />;
-
-	if (!productResponse)
-		return (
-			<>
-				<h1 className="text-3xl font-bold">Products</h1>
-				<div className="py-10">
-					<div className="p-5 rounded-lg bg-white border-2 border-black w-full h-[800px]">
-						<div className="flex items-baseline justify-between">
-							<p className="font-bold text-xl">My Inventory</p>
-							<Link
-								className="bg-slate-200 p-2 rounded-lg hover:drop-shadow-lg"
-								href={"/dashboard/add"}
-							>
-								+ Add Product
-							</Link>
-						</div>
-						<p className="font-bold text-sm pt-3 pb-1">
-							Filter by brand
-						</p>
-						<select
-							defaultValue={""}
-							className="bg-white text-sm outline-none p-1 rounded-lg border-2 border-black"
-						>
-							<option disabled value={""}>
-								Filter by brand
-							</option>
-							{brandResponse?.payload.map(({ name }) => (
-								<option key={name} value={name}>
-									{name}
-								</option>
-							))}
-						</select>
-						<div className="text-center text-lg mt-10">
-							<TextLoader loadingText="Loading" />
-						</div>
-					</div>
-				</div>
-			</>
-		);
+	if (isAuthLoading || !user) return <Loader />;
 
 	return (
-		<>
-			<h1 className="text-3xl font-bold">Products</h1>
-			<div className="py-8">
-				<div className="p-5 rounded-lg bg-white border-2 border-black w-full">
-					<div className="flex items-baseline justify-between">
-						<p className="font-bold text-2xl">My Inventory</p>
+		<Box className="pb-20">
+			<Flex justifyContent="between" alignItems="center" className="mb-8">
+				<Heading level={1} size="3xl" color="text-white">Products</Heading>
+				<Link href="/dashboard/products/add">
+					<Button variant="primary" size="md">+ Add Product</Button>
+				</Link>
+			</Flex>
 
-						<Link
-							className="bg-slate-200 p-2 rounded-lg hover:drop-shadow-lg"
-							href={"/dashboard/products/add"}
-						>
-							+ Add Product
-						</Link>
-					</div>
+			<Card variant="glass" className="p-6">
+				<Stack gap={6}>
+					<Box>
+						<Text weight="bold" size="lg" color="text-white" className="block mb-4">My Inventory</Text>
+						
+						<Stack gap={2}>
+							<label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Filter by brand</label>
+							<select
+								onChange={({ target }) => setBrandName(target.value)}
+								value={brandName}
+								className="bg-white/5 border border-white/10 rounded-xl p-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#58a076]/50 w-full max-w-xs"
+							>
+								<option value="" className="bg-[#0a2735]">All Brands</option>
+								{brands.map(({ name }: { name: string }) => (
+									<option key={name} value={name} className="bg-[#0a2735]">
+										{name}
+									</option>
+								))}
+							</select>
+						</Stack>
+					</Box>
 
-					<p className="font-bold pt-3 text-sm pb-1">
-						Filter by brand
-					</p>
-					<select
-						onChange={({ target }) => setBrandName(target.value)}
-						value={brandName}
-						className="bg-white text-sm outline-none p-1 rounded-lg border-2 border-black"
-					>
-						<option value={""}>None</option>
-						{brandResponse?.payload.map(({ name }) => (
-							<option key={name} value={name}>
-								{name}
-							</option>
-						))}
-					</select>
-
-					<div className="flex flex-wrap justify-center mt-10">
-						{productResponse.payload?.length === 0 && (
-							<p className="text-slate-500 italic">
-								No products in inventory.
-							</p>
-						)}
-						{productResponse.payload?.map((product) => (
-							<ItemCard item={product} key={product.id} />
-						))}
-					</div>
-				</div>
-			</div>
-		</>
+					{products.length === 0 ? (
+						<Box className="py-20 text-center">
+							<Text color="text-slate-500" italic>No products in inventory.</Text>
+						</Box>
+					) : (
+						<Grid cols={1} className="sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" gap={6}>
+							{products.map((product) => (
+								<ItemCard item={product} key={product.id} />
+							))}
+						</Grid>
+					)}
+				</Stack>
+			</Card>
+		</Box>
 	);
 }
 
@@ -148,91 +78,58 @@ function ItemCard({ item }: { item: Item }) {
 		url,
 		name,
 		hidden,
-		last_edited_by_username,
+		last_edited_by_name,
 		slug,
 		text,
 	} = item;
 	const href = "/dashboard/edit/" + id;
 
-	const salePrice = !discount
-		? 0
-		: discount_type === "dollar"
-		  ? price - discount
-		  : price - (price * discount) / 100;
+	const salePrice = calculateSalePrice(item);
 
 	return (
-		<Link className="mt-8 mb-20 md:mr-14" href={href}>
-			<div
-				className={`flex flex-col bg-white hover:bg-slate-50 hover:drop-shadow-lg border-2 border-black p-5 rounded-lg ${
-					hidden === 1 ? "opacity-70" : ""
-				}
-				`}
+		<Link href={href} className="group">
+			<Card 
+				variant="outline" 
+				className={`p-4 h-full transition-all hover:border-[#58a076]/50 hover:bg-white/5 ${hidden === 1 ? "opacity-50" : ""}`}
 			>
-				{hidden === 1 && (
-					<svg
-						className="absolute text-black bg-white rounded-br-lg"
-						xmlns="http://www.w3.org/2000/svg"
-						width="24"
-						height="24"
-						viewBox="0 0 20 20"
-					>
-						<path
-							fill="currentColor"
-							d="M17.3 3.3c-.4-.4-1.1-.4-1.6 0l-2.4 2.4a9.6 9.6 0 0 0-3.3-.6c-3.8.1-7.2 2.1-9 5.4c.2.4.5.8.8 1.2c.8 1.1 1.8 2 2.9 2.7L3 16.1c-.4.4-.5 1.1 0 1.6c.4.4 1.1.5 1.6 0L17.3 4.9c.4-.5.4-1.2 0-1.6m-10.6 9l-1.3 1.3c-1.2-.7-2.3-1.7-3.1-2.9C3.5 9 5.1 7.8 7 7.2c-1.3 1.4-1.4 3.6-.3 5.1M10.1 9c-.5-.5-.4-1.3.1-1.8c.5-.4 1.2-.4 1.7 0zm8.2.5c-.5-.7-1.1-1.4-1.8-1.9l-1 1c.8.6 1.5 1.3 2.1 2.2C15.9 13.4 13 15 9.9 15h-.8l-1 1c.7-.1 1.3 0 1.9 0c3.3 0 6.4-1.6 8.3-4.3c.3-.4.5-.8.8-1.2c-.3-.3-.5-.7-.8-1M14 10l-4 4c2.2 0 4-1.8 4-4"
+				<Stack gap={4}>
+					<Box className="relative aspect-square rounded-2xl overflow-hidden bg-white/5 border border-white/5">
+						<img
+							className="object-cover w-full h-full transition-transform group-hover:scale-110"
+							src={url || "/images/logo.png"}
+							alt={title}
 						/>
-					</svg>
-				)}
-				{/* eslint-disable */}
-				<img
-					className="h-[300px] w-[300px] object-scale-down mb-3 mx-auto"
-					src={url || "/images/logo.png"}
-					alt={title}
-					width={300}
-					height={300}
-				/>
+						{hidden === 1 && (
+							<Box className="absolute inset-0 flex items-center justify-center bg-[#0a2735]/60">
+								<Badge variant="default">Hidden</Badge>
+							</Box>
+						)}
+					</Box>
 
-				<p className="bg-blue-100 w-fit p-1 rounded-lg">
-					<b>Brand:</b> {name}
-				</p>
-				<p
-					className={`w-fit p-1 rounded-lg flex items-baseline ${
-						text ? "bg-green-100" : "bg-orange-100"
-					}`}
-				>
-					{text ? (
-						<>
-							<b>Page:</b>
-							<span className="ml-1 truncate block max-w-[90px]">
-								{text}
-							</span>
-							<span className="ml-1 text-sm">{`</${slug}>`}</span>
-						</>
-					) : (
-						"Not in any pages"
-					)}
-				</p>
+					<Stack gap={1}>
+						<Flex justifyContent="between">
+							<Badge variant="info">{name}</Badge>
+							{text && <Badge variant="success">{text}</Badge>}
+						</Flex>
+						<Text weight="bold" color="text-white" className="truncate block mt-2">{title}</Text>
+						
+						<Box className="mt-1">
+							{salePrice > 0 ? (
+								<Flex gap={2} alignItems="baseline">
+									<Text weight="black" color="text-[#58a076]" size="lg">฿{salePrice.toLocaleString()}</Text>
+									<Text size="xs" color="text-slate-500" className="line-through">฿{price.toLocaleString()}</Text>
+								</Flex>
+							) : (
+								<Text weight="black" color="text-white" size="lg">฿{price.toLocaleString()}</Text>
+							)}
+						</Box>
+					</Stack>
 
-				<p className="mt-3">{title}</p>
-				<p className="text-xl">
-					<span
-						className={
-							salePrice !== 0
-								? "line-through mr-2 text-slate-500"
-								: "font-bold"
-						}
-					>
-						${price}
-					</span>
-					{salePrice !== 0 && (
-						<span className={salePrice !== 0 ? "font-bold" : ""}>
-							${salePrice}
-						</span>
-					)}
-				</p>
-				<p className="text-sm pt-3">
-					Last edited by: {last_edited_by_username}
-				</p>
-			</div>
+					<Box className="pt-2 border-t border-white/5">
+						<Text size="xs" color="text-slate-500">Edited by: {last_edited_by_name}</Text>
+					</Box>
+				</Stack>
+			</Card>
 		</Link>
 	);
 }

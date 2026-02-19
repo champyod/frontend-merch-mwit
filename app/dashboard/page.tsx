@@ -5,14 +5,14 @@ import useRedirect from "@/hooks/useRedirect";
 import Link from "next/link";
 
 export default function DashboardPage() {
-	const { data: userData } = useRedirect({});
+	const { user, isLoading } = useRedirect({});
 
-	if (!userData || !userData.payload.isAuthenticated) return <Loader />;
+	if (isLoading || !user) return <Loader />;
 
 	return (
 		<>
 			<h1 className="text-2xl pb-1 ont-bold">
-									Hi <i>{userData.payload.role}</i>
+									Hi <i>{user.name || user.role}</i>
 								</h1>			<h2 className="text-3xl font-bold">Dashboard</h2>
 			<h3 className="text-xl pt-10 pb-5 font-bold">
 				What&apos;d you like to do today?
