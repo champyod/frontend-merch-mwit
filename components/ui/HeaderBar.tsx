@@ -186,7 +186,7 @@ export default function HeaderBar() {
 						) : (
 							<Button variant="primary" size="md" className="gap-2" onClick={login}>
 								<LogIn className="w-4 h-4" />
-								{t.loginShort}
+								{t.loginShort.value}
 							</Button>
 						)}
 					</Box>
@@ -218,7 +218,7 @@ function OthersDropdown({ navLinks }: { navLinks: NavLinkType[] }) {
 				size="md" 
 				className={`gap-1 ${isOpen ? "text-[#58a076]" : "text-white/70"}`}
 			>
-				{t.others}
+				{t.others.value}
 				<ChevronRight className={`w-4 h-4 transition-transform duration-300 ${isOpen ? "rotate-90" : ""}`} />
 			</Button>
 
