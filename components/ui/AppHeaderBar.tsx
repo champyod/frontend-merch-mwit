@@ -9,12 +9,15 @@ import { useQuery } from "@tanstack/react-query";
 import { Preorder } from "@/types/types";
 import { useAuth } from "@/context/AuthContext";
 import UserMenu from "./UserMenu";
+import { Box, Card, Button, Text, Stack } from "./primitives";
+import { useIntlayer } from "next-intlayer";
+import { X, Menu } from "lucide-react";
 
-type NavLink = {
+type NavLinkType = {
 	href: string;
 	text: string;
 };
-const NAV_LINKS: NavLink[] = [
+const NAV_LINKS: NavLinkType[] = [
 	{
 		href: "/dashboard/pages",
 		text: "Pages",
@@ -40,58 +43,55 @@ const MenuSidebar = ({
 }) => {
 	const { logout } = useAuth();
 	return (
-		<>
+		<Box className="fixed inset-0 z-50 md:hidden">
 			{/* Dark overlay */}
-			<div
+			<Box
 				onClick={() => toggleMenu()}
-				className="cursor-pointer md:hidden absolute z-10 left-0 top-0 opacity-95 bg-gradient-to-l from-primary to-background w-[100vw] h-[100vh]"
-			></div>
+				className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+			/>
 
 			{/* Menu sidebar */}
-			<div
-				className={`drop-shadow-xl md:hidden absolute z-20 top-0 right-0 h-[100vh] w-fit`}
+			<Card
+				variant="solid"
+				className="absolute right-0 top-0 h-full w-[80%] max-w-[300px] flex flex-col p-6 rounded-none border-l border-white/10"
 			>
-				<div className="text-right">
-					<button
-						type="button"
-						aria-label="Close dropdown menu"
-						className={"md:hidden mr-3 mt-6 text-white"}
+				<Box className="flex justify-between items-center mb-10">
+					<Logo />
+					<Button
+						variant="ghost"
+						size="sm"
+						className="p-2 min-w-0"
 						onClick={() => toggleMenu()}
 					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							className="h-6 w-6"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-							strokeWidth={2}
-						>
-							<path
-								strokeLinecap="round"
-								strokeLinejoin="round"
-								d="M6 18L18 6M6 6l12 12"
-							/>
-						</svg>
-					</button>
+						<X className="h-6 w-6" />
+					</Button>
+				</Box>
 
+				<Stack gap={6} className="flex-1 overflow-y-auto">
 					{NAV_LINKS.map((item, index) => (
-						<p
+						<Link
 							key={index}
-							className="md:hidden mx-5 my-8 text-2xl decoration-white text-white font-semibold"
+							href={item.href}
+							className="text-2xl font-bold text-white/90 hover:text-[#58a076] transition-colors"
 							onClick={() => toggleMenu()}
 						>
-							<NavLink href={item.href} text={item.text} />
-						</p>
+							{item.text}
+						</Link>
 					))}
-					<p
-						className="cursor-pointer md:hidden mx-5 my-8 text-2xl decoration-white text-white font-semibold"
+				</Stack>
+
+				<Box className="pt-6 border-t border-white/10 mt-auto">
+					<Button
+						variant="danger"
+						size="lg"
+						className="w-full justify-start"
 						onClick={() => logout()}
 					>
 						Logout
-					</p>
-				</div>
-			</div>
-		</>
+					</Button>
+				</Box>
+			</Card>
+		</Box>
 	);
 };
 
@@ -102,60 +102,42 @@ export default function AppHeaderBar() {
 
 	return (
 		<header
-			className={`fixed z-10 w-full bg-primary bg-opacity-90 backdrop-blur-lg backdrop-filter`}
+			className={`fixed z-10 w-full bg-[#0a2735]/90 backdrop-blur-lg border-b border-white/5`}
 		>
 			<nav
-				className={`flex p-3 items-center justify-between md:justify-around`}
+				className={`container mx-auto px-4 md:px-6 flex h-16 items-center justify-between`}
 			>
-				<Link href="/dashboard">
-					<div className="cursor-pointer">
-						<Logo />
-					</div>
+				<Link href="/dashboard" className="transition-transform hover:scale-105 active:scale-95">
+					<Logo />
 				</Link>
 
-				<div className="flex items-center">
-					{NAV_LINKS.length !== 0 &&
-						NAV_LINKS.map((item, index) => (
-							<div
-								key={index}
-								className={
-									"hidden md:flex items-center relative mx-5 text-lg font-semibold text-white drop-shadow-lg"
-								}
-							>
-								<NavLink href={item.href} text={item.text} />
-								{item.text === "Preorders" && <Alert />}
-							</div>
-						))}
-					
-					<div className="hidden md:block ml-4">
-						<UserMenu />
-					</div>
-				</div>
-
-				{NAV_LINKS.length !== 0 && !menuOpened && (
-					<button
-						type="button"
-						aria-label="Open dropdown menu"
-						className="md:hidden pb-1 text-white rounded-lg drop-shadow-lg"
-						onClick={toggleMenu}
-					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							className="h-6 w-6"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-							strokeWidth={2}
+				<Box className="flex items-center gap-2">
+					{NAV_LINKS.map((item, index) => (
+						<Box
+							key={index}
+							className="hidden md:flex items-center relative mx-2"
 						>
-							<path
-								strokeLinecap="round"
-								strokeLinejoin="round"
-								d="M4 6h16M4 12h16m-7 6h7"
-							/>
-						</svg>
-						<Alert />
-					</button>
-				)}
+							<NavLink href={item.href} text={item.text} />
+							{item.text === "Preorders" && <Alert />}
+						</Box>
+					))}
+					
+					<Box className="hidden md:block ml-4">
+						<UserMenu />
+					</Box>
+
+					{!menuOpened && (
+						<Button
+							variant="secondary"
+							size="sm"
+							className="md:hidden p-2 min-w-0 rounded-full relative"
+							onClick={toggleMenu}
+						>
+							<Menu className="h-6 w-6" />
+							<Alert />
+						</Button>
+					)}
+				</Box>
 
 				{menuOpened && (
 					<MenuSidebar toggleMenu={toggleMenu} />
@@ -185,12 +167,15 @@ function Alert() {
 	)
 		return <></>;
 
+	const count = data?.payload?.filter(({ completed }) => completed === 0).length;
+
 	return (
-		<div
-			className="flex items-center justify-center absolute w-6 h-6 top-5 -right-0 bg-red-700 rounded-full text-xs"
-			style={{ fontFamily: "sans-serif" }}
+		<Box
+			className="flex items-center justify-center absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-[10px] font-black text-white border-2 border-[#0a2735]"
 		>
-			{data?.payload?.filter(({ completed }) => completed === 0).length}
-		</div>
+			{count}
+		</Box>
 	);
 }
+
+
