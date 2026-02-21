@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
 import { useAdminProductsForSet, useCreateSet, useDisableSet, usePaymentAccounts, useUpdateSet, AdminSet } from "@/hooks/useAdmin";
+import { API_BASE_URL } from "@/lib/env";
 
 type SetFormProps = {
 	mode: "create" | "edit";
@@ -37,6 +38,7 @@ export default function SetForm({ mode, initialSet, locale }: SetFormProps) {
 	const [enabled, setEnabled] = useState((initialSet?.enabled ?? 1) === 1);
 	const [paymentAccountId, setPaymentAccountId] = useState<number>(initialSet?.payment_account_id || 0);
 	const [imageURLs, setImageURLs] = useState(normalizedImages);
+	const [isUploadingImages, setIsUploadingImages] = useState(false);
 	const [selectedItems, setSelectedItems] = useState<Record<number, number>>(() => {
 		const acc: Record<number, number> = {};
 		initialSet?.items?.forEach((setItem) => {
@@ -114,6 +116,40 @@ export default function SetForm({ mode, initialSet, locale }: SetFormProps) {
 		}
 	};
 
+	const uploadImages = async (files: FileList | null) => {
+		if (!files || files.length === 0) return;
+		try {
+			setIsUploadingImages(true);
+			const uploadedURLs: string[] = [];
+			for (const file of Array.from(files)) {
+				const formData = new FormData();
+				formData.append("file", file);
+				const response = await fetch(`${API_BASE_URL}/admin/upload`, {
+					method: "POST",
+					body: formData,
+				});
+				const data = await response.json();
+				if (!response.ok || data?.hasError || !data?.payload?.url) {
+					throw new Error(data?.errorMessage || "Image upload failed");
+				}
+				uploadedURLs.push(data.payload.url);
+			}
+
+			setImageURLs((current) => {
+				const existing = current
+					.split("\n")
+					.map((url) => url.trim())
+					.filter(Boolean);
+				return [...existing, ...uploadedURLs].join("\n");
+			});
+			toast.success(`${uploadedURLs.length} image(s) uploaded`);
+		} catch (error) {
+			toast.error(error instanceof Error ? error.message : "Upload failed");
+		} finally {
+			setIsUploadingImages(false);
+		}
+	};
+
 	return (
 		<div className="max-w-5xl mx-auto pb-20 space-y-6">
 			<Link href={`/${locale}/admin/sets`} className="flex items-center text-slate-400 hover:text-white transition-colors text-sm font-bold">
@@ -166,6 +202,17 @@ export default function SetForm({ mode, initialSet, locale }: SetFormProps) {
 					</div>
 					<div>
 						<label htmlFor="set-image-urls" className="text-sm text-slate-400">Image URLs (one per line)</label>
+						<div className="mt-2 mb-2">
+							<input
+								title="Upload set images"
+								type="file"
+								multiple
+								onChange={(event) => uploadImages(event.target.files)}
+								className="block w-full text-sm text-slate-300 file:mr-3 file:rounded-lg file:border-0 file:bg-white/10 file:px-3 file:py-2 file:text-white hover:file:bg-white/20"
+								disabled={isUploadingImages}
+							/>
+							{isUploadingImages && <p className="text-xs text-slate-400 mt-1">Uploading images...</p>}
+						</div>
 						<textarea id="set-image-urls" value={imageURLs} onChange={(event) => setImageURLs(event.target.value)} className="mt-1 w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white min-h-24" />
 					</div>
 				</div>

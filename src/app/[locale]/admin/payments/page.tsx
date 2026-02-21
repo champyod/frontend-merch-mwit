@@ -42,6 +42,21 @@ export default function AdminPaymentsPage() {
     }
   };
 
+  const handleEnable = async (id: number, accountName: string, promptpayId: string) => {
+    try {
+      await updateMutation.mutateAsync({
+        id,
+        name: accountName,
+        promptpay_id: promptpayId,
+        is_active: true,
+      });
+      toast.success("Enabled");
+      refetch();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Enable failed");
+    }
+  };
+
   const startEdit = (id: number, currentName: string, currentPromptpay: string) => {
     setEditingId(id);
     setEditingName(currentName);
@@ -152,6 +167,16 @@ export default function AdminPaymentsPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
+                    {!acc.is_active && editingId !== acc.id && (
+                      <button
+                        aria-label="Enable payment account"
+                        title="Enable payment account"
+                        onClick={() => handleEnable(acc.id, acc.name, acc.promptpay_id)}
+                        className="px-3 py-1.5 text-xs rounded-lg bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 transition-all"
+                      >
+                        Enable
+                      </button>
+                    )}
                     {editingId === acc.id ? (
                       <>
                         <button
@@ -185,6 +210,7 @@ export default function AdminPaymentsPage() {
                       aria-label="Disable payment account"
                       title="Disable payment account"
                       onClick={() => handleDelete(acc.id)}
+                      disabled={!acc.is_active}
                       className="p-2 text-slate-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
                     >
                       <Trash2 className="w-5 h-5" />
