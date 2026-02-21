@@ -202,6 +202,7 @@ function OrderCard({
 								<Stack gap={3}>
 									<Grid cols={2} gap={3}>
 										<select 
+											title="Update preorder status"
 											value={status} 
 											onChange={(e) => setStatus(e.target.value)}
 											className="bg-[#0a2735] border border-white/10 rounded-xl p-2 text-xs text-white focus:outline-none"

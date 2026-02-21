@@ -7,8 +7,7 @@ export default function Loader() {
             <Stack gap={6} alignItems="center">
                 <div className="relative group">
                     <div
-                        className="absolute inset-0 rounded-2xl bg-[#58a076]/10 blur-xl scale-150 animate-pulse"
-                        style={{ animationDuration: '3s' }}
+                        className="absolute inset-0 rounded-2xl bg-[#58a076]/10 blur-xl scale-150 animate-pulse [animation-duration:3s]"
                     />
                     <Image
                         priority

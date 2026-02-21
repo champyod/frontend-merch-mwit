@@ -32,7 +32,6 @@ export function CollectionInput({ form }: Props) {
 				readOnly={true}
 				autoComplete="off"
 				placeholder="Loading..."
-				id="collection"
 				className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white"
 			/>
 		);
@@ -61,7 +60,6 @@ export function CollectionInput({ form }: Props) {
 			<input
 				autoComplete="off"
 				placeholder="Type to filter"
-				id="collection"
 				className="w-full bg-white/5 border-x border-t border-white/10 rounded-t-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#58a076]/50 transition-all outline-none"
 				{...register("collection", { required: true })}
 				onChange={(event) => {
@@ -71,8 +69,8 @@ export function CollectionInput({ form }: Props) {
 				onBlur={() => setValue("collection", formatInput(inputText))}
 			/>
 			<select
+				title="Select collection suggestion"
 				onChange={(event) => setValue("collection", event.target.value)}
-				id="collection"
 				className="w-full bg-white/5 border-x border-b border-white/10 rounded-b-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#58a076]/50 appearance-none cursor-pointer outline-none mb-2"
 				value={selectValue}
 			>

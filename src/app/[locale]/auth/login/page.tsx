@@ -14,10 +14,10 @@ export default function Login() {
 	return (
 		<Box className="min-h-screen flex items-center justify-center p-6 bg-[#0a2735] relative overflow-hidden">
 			{/* Decorative background elements */}
-			<Box className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#217c6b]/20 rounded-full blur-[120px]" />
+			<Box className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary-dark/20 rounded-full blur-[120px]" />
 			<Box className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#58a076]/10 rounded-full blur-[120px]" />
 
-			<Box className="w-full max-w-[450px] z-10">
+			<Box className="w-full max-w-112.5 z-10">
 				<motion.div
 					initial={{ opacity: 0, y: -20 }}
 					animate={{ opacity: 1, y: 0 }}
@@ -27,8 +27,7 @@ export default function Login() {
 					<div className="relative group/logo">
 						<div className="relative w-24 h-24">
 							<div
-								className="absolute inset-0 rounded-2xl bg-white/5 blur-xl scale-150 animate-pulse"
-								style={{ animationDuration: '4s' }}
+								className="absolute inset-0 rounded-2xl bg-white/5 blur-xl scale-150 animate-pulse [animation-duration:4s]"
 							/>
 							<Image
 								src="/logo.png"

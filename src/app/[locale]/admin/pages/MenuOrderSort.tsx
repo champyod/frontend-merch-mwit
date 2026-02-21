@@ -15,7 +15,6 @@ import {
 	sortableKeyboardCoordinates,
 	useSortable,
 } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 import { toast } from "sonner";
 import { EditPage } from "./EditPage";
 import { useState } from "react";
@@ -67,13 +66,8 @@ function SortableItem({
 	deletePage: (id: MenuItem["ID"]) => void;
 	refetch: () => void;
 }) {
-	const { attributes, listeners, setNodeRef, transform, transition } =
+	const { attributes, listeners, setNodeRef } =
 		useSortable({ id: menuItem.slug });
-
-	const style = {
-		transform: CSS.Transform.toString(transform),
-		transition,
-	};
 
 	const [isEditing, setIsEditing] = useState(false);
 	const toggleEditPage = () => setIsEditing(!isEditing);
@@ -94,9 +88,8 @@ function SortableItem({
 
 	return (
 		<div
-			className="flex items-center justify-between border-2 border-black rounded-lg bg-white cursor-pointer mb-5 touch-none"
+			className="flex items-center justify-between border-2 border-black rounded-lg bg-white cursor-pointer mb-5 touch-none transition-all"
 			ref={setNodeRef}
-			style={style}
 		>
 			{isEditing && (
 				<EditPage
@@ -124,7 +117,7 @@ function SortableItem({
 					/>
 				</svg>
 				<p className="flex pl-1 items-baseline">
-					<b className="block truncate sm:max-w-full max-w-[90px]">
+					<b className="block truncate sm:max-w-full max-w-22.5">
 						{menuItem.text}
 					</b>
 					<span className="ml-2 text-sm text-slate-600">
@@ -134,7 +127,7 @@ function SortableItem({
 			</div>
 
 			{menuItem.is_permanent !== 1 && (
-				<button className="bg-slate-300 p-2" onClick={toggleEditPage}>
+				<button title="Edit page" aria-label="Edit page" className="bg-slate-300 p-2" onClick={toggleEditPage}>
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						width="24"
@@ -154,6 +147,8 @@ function SortableItem({
 			)}
 			{menuItem.is_permanent !== 1 && (
 				<button
+					title="Delete page"
+					aria-label="Delete page"
 					className="bg-red-700 rounded-r-md p-2"
 					onClick={() => onDelete(menuItem.ID)}
 				>

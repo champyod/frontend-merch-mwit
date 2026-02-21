@@ -81,7 +81,7 @@ export default function UserMenu() {
 									setIsOpen(false);
 									logout();
 								}}
-								className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-[#ec848c] hover:bg-[#ec848c]/10 transition-all mt-1"
+								className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-coral hover:bg-coral/10 transition-all mt-1"
 							>
 								<LogOut className="w-4 h-4" />
 								Sign Out

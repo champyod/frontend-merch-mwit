@@ -71,6 +71,7 @@ export function ImagesUpload({ form }: { form: UseFormReturn<IFormInputs> }) {
 			>
 				<input 
 					type="file" 
+					title="Upload product images"
 					ref={fileInputRef}
 					onChange={handleFileUpload}
 					multiple

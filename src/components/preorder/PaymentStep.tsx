@@ -45,7 +45,7 @@ export const PaymentStep = ({ isLoading, totalPrice, onBack, onUpload }: Payment
            </Text>
         </Card>
         
-        <Text size="sm" color="text-slate-400" className="max-w-[280px]">
+        <Text size="sm" color="text-slate-400" className="max-w-70">
           {t.transferInstruction.value} <Text weight="bold" color="text-white">฿{totalPrice.toLocaleString()}</Text>
         </Text>
 
@@ -54,6 +54,8 @@ export const PaymentStep = ({ isLoading, totalPrice, onBack, onUpload }: Payment
             <input 
               type="file" 
               accept="image/*" 
+              title="Upload payment slip"
+              aria-label="Upload payment slip"
               className="hidden" 
               ref={fileInputRef}
               onChange={handleFileChange}

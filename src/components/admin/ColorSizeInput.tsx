@@ -94,6 +94,7 @@ export function ColorSizeInput({ form, defaultColorSizeArr }: Props) {
 										Size:
 									</label>
 									<select
+										title="Select size"
 										className="border-b-2 border-black w-full outline-none bg-transparent"
 										value={size.size}
 										onChange={(e) =>
@@ -141,7 +142,7 @@ export function ColorSizeInput({ form, defaultColorSizeArr }: Props) {
 					))}
 					<button
 						type="button"
-						className="my-3 block border-2 border-black hover:bg-slate-50 rounded-lg p-2 font-bold w-[115px]"
+						className="my-3 block border-2 border-black hover:bg-slate-50 rounded-lg p-2 font-bold w-28.75"
 						onClick={() => addSize(colorIndex)}
 					>
 						Add Size +
@@ -151,7 +152,7 @@ export function ColorSizeInput({ form, defaultColorSizeArr }: Props) {
 
 			<button
 				type="button"
-				className="block border-2 border-black hover:bg-slate-50 rounded-lg p-2 font-bold w-[115px]"
+				className="block border-2 border-black hover:bg-slate-50 rounded-lg p-2 font-bold w-28.75"
 				onClick={addColor}
 			>
 				Add Color +

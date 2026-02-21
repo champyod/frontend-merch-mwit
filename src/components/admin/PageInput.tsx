@@ -39,15 +39,13 @@ export function PageInput({ form }: Props) {
 				readOnly={true}
 				autoComplete="off"
 				placeholder="Loading..."
-				id="page"
 				className="border-2 border-black p-2 w-full rounded-lg"
 			/>
 		);
 
 	return (
 		<select
-			id="page"
-			className="w-full bg-white p-2 border-2 border-r-2 border-b-2 border-black rounded-bl-lg rounded-lg bg-slate-100 outline-none mb-2"
+			className="w-full bg-slate-100 p-2 border-2 border-r-2 border-b-2 border-black rounded-bl-lg rounded-lg outline-none mb-2"
 			{...register("pageId")}
 			defaultValue={0}
 		>
