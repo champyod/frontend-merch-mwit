@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { useAdminUsers } from "@/hooks/useAdmin";
+import { API_BASE_URL } from "@/lib/env";
 import { Loader2, Users, CircleDot } from "lucide-react";
+import { toast } from "sonner";
 
 export default function AdminUsersPage() {
 	const [search, setSearch] = useState("");
@@ -37,11 +39,45 @@ export default function AdminUsersPage() {
 		setPage(1);
 	};
 
+	const exportUsers = async () => {
+		try {
+			const query = new URLSearchParams();
+			if (search.trim()) query.set("search", search.trim());
+			if (status !== "all") query.set("status", status);
+			if (role !== "all") query.set("role", role);
+			if (sort) query.set("sort", sort);
+
+			const response = await fetch(`${API_BASE_URL}/admin/users/export${query.toString() ? `?${query.toString()}` : ""}`);
+			if (!response.ok) throw new Error("Failed to export users");
+
+			const blob = await response.blob();
+			const url = window.URL.createObjectURL(blob);
+			const link = document.createElement("a");
+			link.href = url;
+			link.download = `users_${new Date().toISOString().slice(0, 10)}.csv`;
+			document.body.appendChild(link);
+			link.click();
+			link.remove();
+			window.URL.revokeObjectURL(url);
+		} catch (error) {
+			toast.error(error instanceof Error ? error.message : "Export failed");
+		}
+	};
+
 	return (
 		<div className="p-6 space-y-6 pb-20">
-			<div>
+			<div className="flex items-center justify-between gap-3">
+				<div>
 				<h1 className="text-3xl font-bold text-white">Registered Users</h1>
 				<p className="text-slate-400">Customer and super-admin activity overview.</p>
+				</div>
+				<button
+					type="button"
+					onClick={exportUsers}
+					className="px-4 py-2 rounded-xl bg-emerald-500 text-white hover:bg-emerald-400 transition-all text-sm font-semibold"
+				>
+					Export CSV
+				</button>
 			</div>
 
 			<div className="grid grid-cols-1 md:grid-cols-4 gap-3">
