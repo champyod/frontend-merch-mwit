@@ -1,22 +1,24 @@
 "use client";
 
 import Loader from "@/components/ui/Loader";
-import TextLoader from "@/components/ui/TextLoader";
 import { useAuth } from "@/contexts/auth-context";
 import { Item } from "@/types/types";
 import Link from "next/link";
 import { useState } from "react";
-import { useProducts } from "@/hooks/useProducts";
-import { useCollections } from "@/hooks/useAdmin";
-import { Box, Card, Heading, Text, Button, Stack, Container, Flex, Grid, Badge } from "@/components/ui/primitives";
+import { useAdminCollections, useAdminProducts } from "@/hooks/useAdmin";
+import { Box, Card, Heading, Text, Button, Stack, Flex, Grid, Badge } from "@/components/ui/primitives";
 import { calculateSalePrice } from "@/lib/logic";
+import { normalizeLocale } from "@/lib/navigation";
+import { useLocale } from "next-intlayer";
 
 export default function ProductsPage() {
+	const localeData = useLocale();
+	const locale = normalizeLocale(localeData);
 	const { user, isLoading: isAuthLoading } = useAuth();
 	const [collectionName, setCollectionName] = useState("");
 
-	const { data: products = [] } = useProducts(collectionName);
-	const { data: collections = [] } = useCollections(!!user);
+	const { data: products = [] } = useAdminProducts(collectionName, !!user);
+	const { data: collections = [] } = useAdminCollections(!!user);
 
 	if (isAuthLoading || !user) return <Loader />;
 
@@ -24,7 +26,7 @@ export default function ProductsPage() {
 		<Box className="pb-20">
 			<Flex justifyContent="between" alignItems="center" className="mb-8">
 				<Heading level={1} size="3xl" color="text-white">Products</Heading>
-				<Link href="/admin/products/add">
+				<Link href={`/${locale}/admin/products/add`}>
 					<Button variant="primary" size="md">+ Add Product</Button>
 				</Link>
 			</Flex>
@@ -43,9 +45,9 @@ export default function ProductsPage() {
 								className="bg-white/5 border border-white/10 rounded-xl p-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#58a076]/50 w-full max-w-xs"
 							>
 								<option value="" className="bg-[#0a2735]">All Collections</option>
-								{collections.map(({ name }: { name: string }) => (
-									<option key={name} value={name} className="bg-[#0a2735]">
-										{name}
+								{collections.map((collection) => (
+									<option key={collection.id} value={collection.name} className="bg-[#0a2735]">
+										{collection.name}
 									</option>
 								))}
 							</select>
@@ -59,7 +61,7 @@ export default function ProductsPage() {
 					) : (
 						<Grid cols={1} className="sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" gap={6}>
 							{products.map((product) => (
-								<ItemCard item={product} key={product.id} />
+								<ItemCard item={product} key={product.id} locale={locale} />
 							))}
 						</Grid>
 					)}
@@ -69,7 +71,7 @@ export default function ProductsPage() {
 	);
 }
 
-function ItemCard({ item }: { item: Item }) {
+function ItemCard({ item, locale }: { item: Item; locale: "th" | "en" }) {
 	const {
 		id,
 		title,
@@ -83,7 +85,7 @@ function ItemCard({ item }: { item: Item }) {
 		slug,
 		text,
 	} = item;
-	const href = "/admin/products/edit/" + id;
+	const href = `/${locale}/admin/products/edit/${id}`;
 
 	const salePrice = calculateSalePrice(item);
 

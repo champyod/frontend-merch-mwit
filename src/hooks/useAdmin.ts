@@ -81,6 +81,11 @@ export type AdminSet = {
 	updated_at?: string;
 };
 
+export type AdminCollection = {
+	id: number;
+	name: string;
+};
+
 // --- Preorders ---
 
 const fetchAdminPreorders = async (): Promise<Preorder[]> => {
@@ -397,6 +402,41 @@ export const useAdminProductsForSet = (enabled: boolean = true) => {
 	return useQuery({
 		queryKey: ["admin-products-for-set"],
 		queryFn: fetchAdminProductsForSet,
+		enabled,
+	});
+};
+
+const fetchAdminProducts = async (collectionName?: string): Promise<Item[]> => {
+	const query = new URLSearchParams();
+	if (collectionName?.trim()) query.set("collectionName", collectionName.trim());
+	const queryString = query.toString();
+	const res = await fetch(`${API_BASE_URL}/admin/products${queryString ? `?${queryString}` : ""}`);
+	if (!res.ok) throw new Error("Failed to fetch admin products");
+	const data: ApiResponse<Item[]> = await res.json();
+	if (data.hasError) throw new Error(data.errorMessage || "Failed to fetch admin products");
+	return data.payload || [];
+};
+
+export const useAdminProducts = (collectionName?: string, enabled: boolean = true) => {
+	return useQuery({
+		queryKey: ["admin-products", collectionName || ""],
+		queryFn: () => fetchAdminProducts(collectionName),
+		enabled,
+	});
+};
+
+const fetchAdminCollections = async (): Promise<AdminCollection[]> => {
+	const res = await fetch(`${API_BASE_URL}/admin/collections`);
+	if (!res.ok) throw new Error("Failed to fetch admin collections");
+	const data: ApiResponse<AdminCollection[]> = await res.json();
+	if (data.hasError) throw new Error(data.errorMessage || "Failed to fetch admin collections");
+	return data.payload || [];
+};
+
+export const useAdminCollections = (enabled: boolean = true) => {
+	return useQuery({
+		queryKey: ["admin-collections"],
+		queryFn: fetchAdminCollections,
 		enabled,
 	});
 };

@@ -16,7 +16,7 @@ export default function EditItemPage({ params }: { params: Promise<{ itemId: str
 	} = useQuery({
 		queryKey: ["editProduct", itemId],
 		queryFn: async () => {
-			const response = await fetch(`${API_BASE_URL}/products/${itemId}`);
+			const response = await fetch(`${API_BASE_URL}/admin/products/${itemId}`);
 			return await response.json();
 		},
 		select: (productResponse) => productResponse.payload,

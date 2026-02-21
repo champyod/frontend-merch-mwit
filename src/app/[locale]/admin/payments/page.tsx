@@ -3,17 +3,21 @@
 import { useState } from "react";
 import { LiquidCard } from "@/components/ui/LiquidCard";
 import { LiquidButton } from "@/components/ui/LiquidButton";
-import { CreditCard, Plus, Trash2, Loader2, AlertCircle, TrendingUp, ShoppingBag } from "lucide-react";
+import { CreditCard, Plus, Trash2, Loader2, AlertCircle, TrendingUp, ShoppingBag, Pencil, Save, X } from "lucide-react";
 import { Toaster, toast } from "sonner";
-import { useCreatePaymentAccount, useDisablePaymentAccount, usePaymentAccounts } from "@/hooks/useAdmin";
+import { useCreatePaymentAccount, useDisablePaymentAccount, usePaymentAccounts, useUpdatePaymentAccount } from "@/hooks/useAdmin";
 
 export default function AdminPaymentsPage() {
   const { data: accounts = [], isLoading, refetch } = usePaymentAccounts();
   const createMutation = useCreatePaymentAccount();
+  const updateMutation = useUpdatePaymentAccount();
   const disableMutation = useDisablePaymentAccount();
   
   const [name, setName] = useState("");
   const [ppId, setPpId] = useState("");
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingName, setEditingName] = useState("");
+  const [editingPpId, setEditingPpId] = useState("");
 
   const handleCreate = async () => {
     if (!name || !ppId) return toast.error("Please fill all fields");
@@ -35,6 +39,34 @@ export default function AdminPaymentsPage() {
       refetch();
     } catch (e) {
       toast.error("Disable failed");
+    }
+  };
+
+  const startEdit = (id: number, currentName: string, currentPromptpay: string) => {
+    setEditingId(id);
+    setEditingName(currentName);
+    setEditingPpId(currentPromptpay);
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditingName("");
+    setEditingPpId("");
+  };
+
+  const saveEdit = async (id: number) => {
+    if (!editingName || !editingPpId) return toast.error("Please fill all fields");
+    try {
+      await updateMutation.mutateAsync({
+        id,
+        name: editingName,
+        promptpay_id: editingPpId,
+      });
+      toast.success("Account updated");
+      cancelEdit();
+      refetch();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Update failed");
     }
   };
 
@@ -95,19 +127,69 @@ export default function AdminPaymentsPage() {
                       <CreditCard className="w-6 h-6 text-emerald-500" />
                     </div>
                     <div>
-                      <div className="font-bold text-white text-xl">{acc.name}</div>
-                      <div className="text-sm text-emerald-500 font-mono tracking-wider">{acc.promptpay_id}</div>
+                      {editingId === acc.id ? (
+                        <div className="space-y-2">
+                          <input
+                            title="Edit account name"
+                            value={editingName}
+                            onChange={(e) => setEditingName(e.target.value)}
+                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white text-sm"
+                          />
+                          <input
+                            title="Edit PromptPay ID"
+                            value={editingPpId}
+                            onChange={(e) => setEditingPpId(e.target.value)}
+                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-emerald-300 text-sm font-mono"
+                          />
+                        </div>
+                      ) : (
+                        <>
+                          <div className="font-bold text-white text-xl">{acc.name}</div>
+                          <div className="text-sm text-emerald-500 font-mono tracking-wider">{acc.promptpay_id}</div>
+                        </>
+                      )}
                       <div className={`text-xs mt-1 ${acc.is_active ? "text-emerald-400" : "text-slate-500"}`}>{acc.is_active ? "Active" : "Disabled"}</div>
                     </div>
                   </div>
-                  <button 
-                    aria-label="Disable payment account"
-                    title="Disable payment account"
-                    onClick={() => handleDelete(acc.id)}
-                    className="p-2 text-slate-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    {editingId === acc.id ? (
+                      <>
+                        <button
+                          aria-label="Save payment account"
+                          title="Save payment account"
+                          onClick={() => saveEdit(acc.id)}
+                          className="p-2 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 rounded-lg transition-all"
+                        >
+                          <Save className="w-5 h-5" />
+                        </button>
+                        <button
+                          aria-label="Cancel edit"
+                          title="Cancel edit"
+                          onClick={cancelEdit}
+                          className="p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-all"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        aria-label="Edit payment account"
+                        title="Edit payment account"
+                        onClick={() => startEdit(acc.id, acc.name, acc.promptpay_id)}
+                        className="p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-all"
+                      >
+                        <Pencil className="w-5 h-5" />
+                      </button>
+                    )}
+                    <button 
+                      aria-label="Disable payment account"
+                      title="Disable payment account"
+                      onClick={() => handleDelete(acc.id)}
+                      className="p-2 text-slate-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
