@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Card, Box, Stack, Text, Heading, Button } from "@/components/ui/primitives";
 
 export const EmptyState = () => {
-  const { emptyTitle, emptyDescription, browseProducts } = useIntlayer("orders-list");
+  const t = useIntlayer("orders-list");
 
   return (
     <Card variant="glass" className="p-12 text-center">
@@ -17,15 +17,15 @@ export const EmptyState = () => {
         </Box>
         <Stack gap={2}>
           <Heading level={2} size="xl" color="text-white">
-            {emptyTitle}
+            {t.emptyTitle.value}
           </Heading>
           <Text color="text-white/40">
-            {emptyDescription}
+            {t.emptyDescription.value}
           </Text>
         </Stack>
         <Link href="/products" passHref>
           <Button variant="primary">
-            {browseProducts}
+            {t.browseProducts.value}
           </Button>
         </Link>
       </Stack>

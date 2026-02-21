@@ -2,24 +2,34 @@
 
 import React from "react";
 import { CheckCircle2, ChevronRight, LogIn } from "lucide-react";
-import { useIntlayer } from "next-intlayer";
+import { useIntlayer, useLocale } from "next-intlayer";
 import { motion } from "framer-motion";
 import { Stack, Flex, Heading, Text, Button, Card } from "@/components/ui/primitives";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
+import { navigateWithLocale } from "@/lib/navigation";
 
 interface SuccessStepProps {
   preorderId: number;
 }
 
+const normalizeLocale = (value: unknown): "th" | "en" => {
+	if (value === "en") return "en";
+	if (value === "th") return "th";
+	return "th";
+};
+
 export const SuccessStep = ({ preorderId }: SuccessStepProps) => {
   const router = useRouter();
   const { user, login } = useAuth();
+  const localeData = useLocale();
+  const locale = normalizeLocale(
+    typeof localeData === "string"
+      ? localeData
+      : (localeData as { locale?: string } | undefined)?.locale
+  );
   
-  const {
-    orderSuccessful, orderPlacedMessage, linkedAccount, trackOrder,
-    signInPrompt, signInButton, continueShopping
-  } = useIntlayer("preorder-form");
+  const t = useIntlayer("preorder-form");
 
   return (
     <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }}>
@@ -28,26 +38,26 @@ export const SuccessStep = ({ preorderId }: SuccessStepProps) => {
         
         <Stack gap={2}>
           <Heading level={2} size="3xl" color="text-white" weight="bold">
-            {orderSuccessful}
+            {t.orderSuccessful.value}
           </Heading>
           <Text color="text-slate-400">
-            {orderPlacedMessage} #{preorderId}
+            {t.orderPlacedMessage.value} #{preorderId}
           </Text>
         </Stack>
 
         {user ? (
           <Stack gap={4} className="w-full">
             <Text size="sm" color="text-emerald-500" weight="bold">
-              {linkedAccount}
+              {t.linkedAccount.value}
             </Text>
-            <Button variant="liquid" className="w-full" onClick={() => router.push(`/orders/${preorderId}`)}>
-              {trackOrder} <ChevronRight className="w-4 h-4 ml-1" />
+            <Button variant="liquid" className="w-full" onClick={() => navigateWithLocale(router, locale, `/orders/${preorderId}`)}>
+              {t.trackOrder.value} <ChevronRight className="w-4 h-4 ml-1" />
             </Button>
           </Stack>
         ) : (
           <Card variant="glass" className="p-6 w-full space-y-4">
             <Text size="sm" color="text-slate-400">
-              {signInPrompt}
+              {t.signInPrompt.value}
             </Text>
             <Button 
               variant="secondary"
@@ -55,13 +65,13 @@ export const SuccessStep = ({ preorderId }: SuccessStepProps) => {
               onClick={login}
             >
               <LogIn className="w-4 h-4 mr-2" />
-              {signInButton}
+              {t.signInButton.value}
             </Button>
           </Card>
         )}
 
-        <Button variant="ghost" className="w-full" onClick={() => router.push('/')}>
-          {continueShopping}
+        <Button variant="ghost" className="w-full" onClick={() => navigateWithLocale(router, locale, "/")}>
+          {t.continueShopping.value}
         </Button>
       </Stack>
     </motion.div>

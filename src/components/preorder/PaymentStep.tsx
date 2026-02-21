@@ -16,10 +16,7 @@ interface PaymentStepProps {
 export const PaymentStep = ({ isLoading, totalPrice, onBack, onUpload }: PaymentStepProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const {
-    scanToPay, totalToPay, recipientName,
-    transferInstruction, uploadSlip, fileType, backToDetails
-  } = useIntlayer("preorder-form");
+  const t = useIntlayer("preorder-form");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -32,24 +29,24 @@ export const PaymentStep = ({ isLoading, totalPrice, onBack, onUpload }: Payment
         <Flex gap={2}>
           <QrCode className="w-6 h-6 text-emerald-500" />
           <Heading level={2} size="xl" color="text-white">
-            {scanToPay}
+            {t.scanToPay.value}
           </Heading>
         </Flex>
         
-        <Card variant="solid" className="bg-white p-6 shadow-2xl w-full max-w-sm">
+        <Card variant="solid" className="bg-white p-6 shadow-2xl w-full max-sm:px-4">
            <Text size="md" weight="medium" color="text-slate-900" className="mb-2 block">
-             {totalToPay}
+             {t.totalToPay.value}
            </Text>
            <Text size="4xl" weight="black" color="text-slate-900" className="mb-4 block">
              ฿{totalPrice.toLocaleString()}
            </Text>
            <Text size="xs" color="text-slate-400" uppercase tracking="widest" weight="bold">
-             {recipientName}
+             {t.recipientName.value}
            </Text>
         </Card>
         
         <Text size="sm" color="text-slate-400" className="max-w-[280px]">
-          {transferInstruction} <Text weight="bold" color="text-white">฿{totalPrice.toLocaleString()}</Text>
+          {t.transferInstruction.value} <Text weight="bold" color="text-white">฿{totalPrice.toLocaleString()}</Text>
         </Text>
 
         <Stack gap={3} className="w-full">
@@ -68,15 +65,15 @@ export const PaymentStep = ({ isLoading, totalPrice, onBack, onUpload }: Payment
               ) : (
                 <>
                   <Upload className="w-6 h-6 text-emerald-500 mb-2" />
-                  <Text weight="medium" color="text-emerald-500">{uploadSlip}</Text>
-                  <Text size="xs" color="text-slate-500">{fileType}</Text>
+                  <Text weight="medium" color="text-emerald-500">{t.uploadSlip.value}</Text>
+                  <Text size="xs" color="text-slate-500">{t.fileType.value}</Text>
                 </>
               )}
             </Card>
           </Box>
 
           <Button variant="ghost" className="w-full" onClick={onBack}>
-            <ChevronLeft className="w-4 h-4 mr-1" /> {backToDetails}
+            <ChevronLeft className="w-4 h-4 mr-1" /> {t.backToDetails.value}
           </Button>
         </Stack>
       </Stack>

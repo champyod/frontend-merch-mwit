@@ -1,26 +1,26 @@
 "use client";
 
 import Loader from "@/components/ui/Loader";
-import useRedirect from "@/hooks/useRedirect";
+import { useAuth } from "@/contexts/auth-context";
 import Link from "next/link";
 
 export default function DashboardPage() {
-	const { user, isLoading } = useRedirect({});
+	const { user, isLoading } = useAuth();
 
 	if (isLoading || !user) return <Loader />;
 
 	return (
 		<>
-			<h1 className="text-2xl pb-1 ont-bold">
+			<h1 className="text-2xl pb-1 font-bold">
 									Hi <i>{user.name || user.role}</i>
-								</h1>			<h2 className="text-3xl font-bold">Dashboard</h2>
+								</h1>			<h2 className="text-3xl font-bold">Admin Panel</h2>
 			<h3 className="text-xl pt-10 pb-5 font-bold">
 				What&apos;d you like to do today?
 			</h3>
 
 			<Link
-				className="border-2 border-black bg-white p-2 w-full rounded-lg block text-lg hover:drop-shadow-lg flex items-center justify-between"
-				href={"/dashboard/pages"}
+				className="border-2 border-black bg-white p-2 w-full rounded-lg text-lg hover:drop-shadow-lg flex items-center justify-between"
+				href={"/admin/pages"}
 			>
 				<span>
 					Edit my <b>pages</b>.
@@ -38,8 +38,8 @@ export default function DashboardPage() {
 				</svg>
 			</Link>
 			<Link
-				className="border-2 border-black bg-white p-2 w-full rounded-lg block mt-5 text-lg hover:drop-shadow-lg flex items-center justify-between"
-				href={"/dashboard/products"}
+				className="border-2 border-black bg-white p-2 w-full rounded-lg mt-5 text-lg hover:drop-shadow-lg flex items-center justify-between"
+				href={"/admin/products"}
 			>
 				<span>
 					Add/Edit my <b>products</b>.
@@ -57,8 +57,8 @@ export default function DashboardPage() {
 				</svg>
 			</Link>
 			<Link
-				className="border-2 border-black bg-white p-2 w-full rounded-lg block mt-5 text-lg hover:drop-shadow-lg flex items-center justify-between"
-				href={"/dashboard/preorders"}
+				className="border-2 border-black bg-white p-2 w-full rounded-lg mt-5 text-lg hover:drop-shadow-lg flex items-center justify-between"
+				href={"/admin/preorders"}
 			>
 				<span>
 					Check customers&apos; <b>preorders</b>.
@@ -76,8 +76,8 @@ export default function DashboardPage() {
 				</svg>
 			</Link>
 			<Link
-				className="border-2 border-black bg-white p-2 w-full rounded-lg block mt-5 text-lg hover:drop-shadow-lg flex items-center justify-between"
-				href={"/dashboard/settings"}
+				className="border-2 border-black bg-white p-2 w-full rounded-lg mt-5 text-lg hover:drop-shadow-lg flex items-center justify-between"
+				href={"/admin/settings"}
 			>
 				<span>
 					Check on my site <b>settings</b>.

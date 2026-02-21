@@ -3,12 +3,15 @@
 import { BRAND_SOCIALS } from "@/config";
 import Link from "next/link";
 import Logo from "../Logo";
-import { useIntlayer } from "next-intlayer";
+import { useIntlayer, useLocale } from "next-intlayer";
 import { Box, Container, Grid, Stack, Flex, Text, Heading } from "@/components/ui/primitives";
 import { Facebook, Instagram } from "lucide-react";
+import { buildLocalePath, normalizeLocale } from "@/lib/navigation";
 
 export default function Footer({ brandName }: { brandName: string }) {
   const t = useIntlayer("footer");
+  const localeData = useLocale();
+  const locale = normalizeLocale(localeData);
 
   return (
     <Box as="footer" className="bg-[#0a2735] border-t border-white/5 pt-20 pb-10 px-6">
@@ -45,17 +48,17 @@ export default function Footer({ brandName }: { brandName: string }) {
             </Heading>
             <Stack as="ul" gap={4}>
               <Box as="li">
-                <Link href="/" className="text-white/50 hover:text-[#58a076] transition-colors text-sm font-bold">
+                <Link href={buildLocalePath(locale, "/")} className="text-white/50 hover:text-[#58a076] transition-colors text-sm font-bold">
                   {t.navigation.home.value}
                 </Link>
               </Box>
               <Box as="li">
-                <Link href="/pre-orders" className="text-white/50 hover:text-[#58a076] transition-colors text-sm font-bold">
+                <Link href={buildLocalePath(locale, "/pre-orders")} className="text-white/50 hover:text-[#58a076] transition-colors text-sm font-bold">
                   {t.navigation.preorders.value}
                 </Link>
               </Box>
               <Box as="li">
-                <Link href="/cart" className="text-white/50 hover:text-[#58a076] transition-colors text-sm font-bold">
+                <Link href={buildLocalePath(locale, "/cart")} className="text-white/50 hover:text-[#58a076] transition-colors text-sm font-bold">
                   {t.navigation.cart.value}
                 </Link>
               </Box>
@@ -68,17 +71,17 @@ export default function Footer({ brandName }: { brandName: string }) {
             </Heading>
             <Stack as="ul" gap={4}>
               <Box as="li">
-                <Link href="/privacy-policy" className="text-white/50 hover:text-[#58a076] transition-colors text-sm font-bold">
+                <Link href={buildLocalePath(locale, "/privacy-policy")} className="text-white/50 hover:text-[#58a076] transition-colors text-sm font-bold">
                   {t.support.privacy.value}
                 </Link>
               </Box>
               <Box as="li">
-                <Link href="/refund-policy" className="text-white/50 hover:text-[#58a076] transition-colors text-sm font-bold">
+                <Link href={buildLocalePath(locale, "/refund-policy")} className="text-white/50 hover:text-[#58a076] transition-colors text-sm font-bold">
                   {t.support.refund.value}
                 </Link>
               </Box>
               <Box as="li">
-                <Link href="/shipping-policy" className="text-white/50 hover:text-[#58a076] transition-colors text-sm font-bold">
+                <Link href={buildLocalePath(locale, "/shipping-policy")} className="text-white/50 hover:text-[#58a076] transition-colors text-sm font-bold">
                   {t.support.shipping.value}
                 </Link>
               </Box>

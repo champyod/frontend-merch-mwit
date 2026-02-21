@@ -10,37 +10,47 @@ import { Preorder } from "@/types/types";
 import { useAuth } from "@/contexts/auth-context";
 import UserMenu from "./UserMenu";
 import { Box, Card, Button, Text, Stack } from "./primitives";
-import { useIntlayer } from "next-intlayer";
+import { useIntlayer, useLocale } from "next-intlayer";
 import { X, Menu } from "lucide-react";
 import { API_BASE_URL } from "@/lib/env";
+import { buildLocalePath, normalizeLocale } from "@/lib/navigation";
 
 type NavLinkType = {
 	href: string;
 	text: string;
 };
-const NAV_LINKS: NavLinkType[] = [
+
+const normalizeLocaleFn = (value: unknown): "th" | "en" => {
+	if (value === "en") return "en";
+	if (value === "th") return "th";
+	return "th";
+};
+
+const getNavLinks = (locale: string): NavLinkType[] => [
 	{
-		href: "/dashboard/pages",
+		href: `/${locale}/admin/pages`,
 		text: "Pages",
 	},
 	{
-		href: "/dashboard/products",
+		href: `/${locale}/admin/products`,
 		text: "Products",
 	},
 	{
-		href: "/dashboard/preorders",
+		href: `/${locale}/admin/preorders`,
 		text: "Preorders",
 	},
 	{
-		href: "/dashboard/settings",
+		href: `/${locale}/admin/settings`,
 		text: "Settings",
 	},
 ];
 
 const MenuSidebar = ({
 	toggleMenu,
+	navLinks,
 }: {
 	toggleMenu: () => void;
+	navLinks: NavLinkType[];
 }) => {
 	const { logout } = useAuth();
 	return (
@@ -54,7 +64,7 @@ const MenuSidebar = ({
 			{/* Menu sidebar */}
 			<Card
 				variant="solid"
-				className="absolute right-0 top-0 h-full w-[80%] max-w-[300px] flex flex-col p-6 rounded-none border-l border-white/10"
+				className="absolute right-0 top-0 h-full w-[80%] max-w-75 flex flex-col p-6 rounded-none border-l border-white/10"
 			>
 				<Box className="flex justify-between items-center mb-10">
 					<Logo />
@@ -69,7 +79,7 @@ const MenuSidebar = ({
 				</Box>
 
 				<Stack gap={6} className="flex-1 overflow-y-auto">
-					{NAV_LINKS.map((item, index) => (
+					{navLinks.map((item, index) => (
 						<Link
 							key={index}
 							href={item.href}
@@ -100,29 +110,40 @@ export default function AppHeaderBar() {
 	const [menuOpened, setMenuOpened] = useState<boolean>(false);
 	const toggleMenu = () => setMenuOpened(!menuOpened);
 	const { user } = useAuth();
+	const localeData = useLocale();
+	const locale = normalizeLocaleFn(
+		typeof localeData === "string"
+			? localeData
+			: (localeData as { locale?: string } | undefined)?.locale
+	);
+	const navLinks = getNavLinks(locale);
 
 	return (
 		<header
 			className={`fixed z-10 w-full bg-[#0a2735]/90 backdrop-blur-lg border-b border-white/5`}
 		>
 			<nav
-				className={`container mx-auto px-4 md:px-6 flex h-16 items-center justify-between`}
+				className={`container mx-auto px-4 md:px-6 flex h-16 items-center justify-between relative`}
 			>
-				<Link href="/dashboard" className="transition-transform hover:scale-105 active:scale-95">
+				<Link href={`/${locale}/admin`} className="transition-transform hover:scale-105 active:scale-95 z-10">
 					<Logo />
 				</Link>
 
-				<Box className="flex items-center gap-2">
-					{NAV_LINKS.map((item, index) => (
-						<Box
-							key={index}
-							className="hidden md:flex items-center relative mx-2"
-						>
-							<NavLink href={item.href} text={item.text} />
-							{item.text === "Preorders" && <Alert />}
-						</Box>
-					))}
-					
+				<Box className="hidden md:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+					<Box className="flex items-center gap-2">
+						{navLinks.map((item, index) => (
+							<Box
+								key={index}
+								className="flex items-center relative mx-2"
+							>
+								<NavLink href={item.href} text={item.text} />
+								{item.text === "Preorders" && <Alert />}
+							</Box>
+						))}
+					</Box>
+				</Box>
+
+				<Box className="flex items-center gap-2 z-10">
 					<Box className="hidden md:block ml-4">
 						<UserMenu />
 					</Box>
@@ -141,7 +162,7 @@ export default function AppHeaderBar() {
 				</Box>
 
 				{menuOpened && (
-					<MenuSidebar toggleMenu={toggleMenu} />
+					<MenuSidebar toggleMenu={toggleMenu} navLinks={navLinks} />
 				)}
 			</nav>
 		</header>

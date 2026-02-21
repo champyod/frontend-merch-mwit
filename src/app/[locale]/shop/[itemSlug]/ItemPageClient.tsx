@@ -10,10 +10,14 @@ import Loader from "@/components/ui/Loader";
 import { calculateSalePrice } from "@/lib/logic";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
+import { useLocale } from "next-intlayer";
+import { buildLocalePath, normalizeLocale } from "@/lib/navigation";
 
 export default function ItemPageClient({ itemId }: { itemId: string }) {
 	const { data: item, isLoading } = useProduct(itemId);
 	const t = useIntlayer("product");
+	const localeData = useLocale();
+	const locale = normalizeLocale(localeData);
 
 	if (isLoading) return (
 		<Box className="min-h-screen flex items-center justify-center pt-32 bg-[#0a2735]">
@@ -26,7 +30,7 @@ export default function ItemPageClient({ itemId }: { itemId: string }) {
 			<Container maxWidth="4xl" className="text-center">
 				<Stack gap={6}>
 					<Heading level={1} size="2xl" color="text-white">{t.productNotFound.value}</Heading>
-					<Link href="/">
+					<Link href={buildLocalePath(locale, "/")}>
 						<Button variant="secondary">{t.backToHome.value}</Button>
 					</Link>
 				</Stack>
@@ -39,7 +43,7 @@ export default function ItemPageClient({ itemId }: { itemId: string }) {
 	return (
 		<Box className="min-h-screen pt-32 pb-20 px-4 bg-[#0a2735]">
 			<Container maxWidth="6xl">
-				<Link href="/" className="inline-flex items-center gap-2 text-white/40 hover:text-white font-bold transition-colors mb-8">
+				<Link href={buildLocalePath(locale, "/")} className="inline-flex items-center gap-2 text-white/40 hover:text-white font-bold transition-colors mb-8">
 					<ChevronLeft className="w-5 h-5" />
 					{t.backToHome.value}
 				</Link>

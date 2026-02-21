@@ -5,14 +5,17 @@ import PreorderForm from "@/components/preorder/PreorderForm";
 import { Trash2, ShoppingBag, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { CartItem } from "@/types/types";
-import { useIntlayer } from "next-intlayer";
+import { useIntlayer, useLocale } from "next-intlayer";
 import { Box, Card, Heading, Text, Button, Stack, Container, Flex } from "@/components/ui/primitives";
 import Loader from "@/components/ui/Loader";
 import { calculateCartSubtotal } from "@/lib/logic";
+import { buildLocalePath, normalizeLocale } from "@/lib/navigation";
 
 export default function CartPage() {
   const { cart, removeFromCart, isLoading } = useCart();
   const t = useIntlayer("cart");
+  const localeData = useLocale();
+  const locale = normalizeLocale(localeData);
 
   const subtotal = calculateCartSubtotal(cart);
 
@@ -33,7 +36,7 @@ export default function CartPage() {
             <Heading level={1} size="3xl" color="text-white">{t.emptyTitle.value}</Heading>
             <Text color="text-slate-400">{t.emptySubtitle.value}</Text>
           </Stack>
-          <Link href="/">
+          <Link href={buildLocalePath(locale, "/")}>
             <Button variant="primary" size="lg">
               {t.goShopping.value}
             </Button>
@@ -47,7 +50,7 @@ export default function CartPage() {
     <Box className="min-h-screen bg-[#0a2735] pt-32 pb-20 px-4">
       <Container maxWidth="6xl">
         <Flex gap={4} className="mb-10" alignItems="center">
-          <Link href="/">
+          <Link href={buildLocalePath(locale, "/")}>
              <Button variant="secondary" size="sm" className="p-2 rounded-full min-w-0">
                 <ArrowLeft className="w-6 h-6" />
              </Button>

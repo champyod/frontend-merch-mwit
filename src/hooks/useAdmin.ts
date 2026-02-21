@@ -76,18 +76,18 @@ export const usePaymentAccounts = (enabled: boolean = true) => {
 	});
 };
 
-// --- Brands ---
+// --- Collections ---
 
-const fetchBrands = async () => {
+const fetchCollections = async () => {
 	const res = await fetch(`${API_BASE_URL}/brand`);
 	const data = await res.json();
 	return data.payload || [];
 };
 
-export const useBrands = (enabled: boolean = true) => {
+export const useCollections = (enabled: boolean = true) => {
 	return useQuery({
-		queryKey: ["brands"],
-		queryFn: fetchBrands,
+		queryKey: ["collections"],
+		queryFn: fetchCollections,
 		enabled,
 	});
 };

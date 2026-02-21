@@ -206,7 +206,7 @@ export const Heading = ({
   uppercase?: boolean;
   tracking?: "tight" | "normal" | "wide" | "widest";
 }) => {
-  const Tag = `h${level}` as keyof JSX.IntrinsicElements;
+  const Tag = `h${level}` as keyof React.JSX.IntrinsicElements;
   const sizeMap = { 
     sm: "text-sm", md: "text-base", lg: "text-lg", xl: "text-xl", 
     "2xl": "text-2xl", "3xl": "text-3xl", "4xl": "text-4xl" 

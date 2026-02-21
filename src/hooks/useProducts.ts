@@ -23,31 +23,31 @@ const fetchProducts = async (brandName?: string): Promise<Item[]> => {
 };
 
 const fetchAllProducts = async (): Promise<Item[]> => {
-	const res = await fetch(`${API_BASE_URL}/brand/all`);
+	const res = await fetch(`${API_BASE_URL}/products`);
 	const data: GetProductsResponse = await res.json();
 	if (data.hasError) throw new Error(data.errorMessage);
 	return data.payload || [];
 };
 
 const fetchProductsByPage = async (slug: string): Promise<Item[]> => {
-	const res = await fetch(`${API_BASE_URL}/brand/page/${slug}`);
+	const res = await fetch(`${API_BASE_URL}/products?brandName=${encodeURIComponent(slug)}`);
 	const data: GetProductsResponse = await res.json();
 	if (data.hasError) throw new Error(data.errorMessage);
 	return data.payload || [];
 };
 
 const fetchPreorderItems = async (): Promise<Item[]> => {
-	const res = await fetch(`${API_BASE_URL}/brand/preorders`);
+	const res = await fetch(`${API_BASE_URL}/products`);
 	const data: GetProductsResponse = await res.json();
 	if (data.hasError) throw new Error(data.errorMessage);
-	return data.payload || [];
+	return (data.payload || []).filter((item) => item.is_preorder === 1);
 };
 
 const fetchSaleItems = async (): Promise<Item[]> => {
-	const res = await fetch(`${API_BASE_URL}/brand/sales`);
+	const res = await fetch(`${API_BASE_URL}/products`);
 	const data: GetProductsResponse = await res.json();
 	if (data.hasError) throw new Error(data.errorMessage);
-	return data.payload || [];
+	return (data.payload || []).filter((item) => (item.discount || 0) > 0);
 };
 
 const fetchProduct = async (itemId: string): Promise<Item> => {

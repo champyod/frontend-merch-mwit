@@ -1,8 +1,7 @@
-"use client";
-
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { CartItem } from '@/types/types';
 import { useAuth } from './auth-context';
+import { API_BASE_URL } from '@/lib/env';
 
 interface CartContextType {
   cart: CartItem[];
@@ -18,12 +17,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
-  const { user, isLoading: isAuthLoading } = useAuth();
+  const { user } = useAuth();
   
-  // Track if we've already merged the local cart to server after login
+  // Track synchronization state
   const hasMergedLocalCart = useRef(false);
+  const skipSyncRef = useRef(false);
+  const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // 1. Initial Load from LocalStorage (for anonymous or before sync)
+  // 1. Initial Load from LocalStorage
   useEffect(() => {
     const savedCart = localStorage.getItem('cart');
     if (savedCart) {
@@ -36,70 +37,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsInitialized(true);
   }, []);
 
-  // 2. Fetch from Server if logged in
-  useEffect(() => {
-    if (user && isInitialized) {
-      const fetchServerCart = async () => {
-        try {
-          const res = await fetch('/api/me/cart');
-          const data = await res.json();
-          if (!data.hasError && data.payload) {
-            const serverItems = data.payload.map((ci: any) => ({
-              item_id: ci.item_id,
-              title: ci.item.title,
-              price: ci.item.price,
-              size: ci.size,
-              color: ci.color,
-              quantity: ci.quantity,
-              image_url: ci.item.images?.[0]?.url
-            }));
-
-            // Merge local cart if it hasn't been done this session
-            if (!hasMergedLocalCart.current && cart.length > 0) {
-              const mergedCart = [...serverItems];
-              cart.forEach(localItem => {
-                const existing = mergedCart.find(
-                  si => si.item_id === localItem.item_id && si.size === localItem.size && si.color === localItem.color
-                );
-                if (existing) {
-                  existing.quantity += localItem.quantity;
-                } else {
-                  mergedCart.push(localItem);
-                }
-              });
-              setCart(mergedCart);
-              hasMergedLocalCart.current = true;
-              // Sync back to server immediately after merge
-              syncWithServer(mergedCart);
-            } else {
-              setCart(serverItems);
-              hasMergedLocalCart.current = true;
-            }
-          }
-        } catch (e) {
-          console.error("Failed to fetch server cart", e);
-        }
-      };
-      fetchServerCart();
-    }
-  }, [user, isInitialized]);
-
-  // 3. Save to LocalStorage whenever cart changes
-  useEffect(() => {
-    if (isInitialized) {
-      localStorage.setItem('cart', JSON.stringify(cart));
-      
-      // If logged in, sync to server (debounced or on change)
-      if (user && hasMergedLocalCart.current) {
-        syncWithServer(cart);
-      }
-    }
-  }, [cart, isInitialized, user]);
-
-  const syncWithServer = async (items: CartItem[]) => {
+  const syncWithServer = useCallback(async (items: CartItem[]) => {
+    if (!user) return;
+    
     setIsSyncing(true);
     try {
-      await fetch('/api/me/cart', {
+      await fetch(`${API_BASE_URL}/me/cart`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(items.map(i => ({
@@ -114,7 +57,81 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setIsSyncing(false);
     }
-  };
+  }, [user]);
+
+  // 2. Fetch from Server if logged in
+  useEffect(() => {
+    if (user && isInitialized && !hasMergedLocalCart.current) {
+      const fetchServerCart = async () => {
+        try {
+          const res = await fetch(`${API_BASE_URL}/me/cart`);
+          const data = await res.json();
+          
+          if (!data.hasError && data.payload) {
+            const serverItems = data.payload.map((ci: any) => ({
+              item_id: ci.item_id,
+              title: ci.item.title,
+              price: ci.item.price,
+              size: ci.size,
+              color: ci.color,
+              quantity: ci.quantity,
+              image_url: ci.item.images?.[0]?.url
+            }));
+
+            // Merge local cart if it exists
+            if (cart.length > 0) {
+              const mergedCart = [...serverItems];
+              cart.forEach(localItem => {
+                const existing = mergedCart.find(
+                  si => si.item_id === localItem.item_id && si.size === localItem.size && si.color === localItem.color
+                );
+                if (existing) {
+                  existing.quantity += localItem.quantity;
+                } else {
+                  mergedCart.push(localItem);
+                }
+              });
+              
+              skipSyncRef.current = false; // We WANT to sync the merged result back
+              setCart(mergedCart);
+              syncWithServer(mergedCart);
+            } else {
+              skipSyncRef.current = true; // Just loaded from server, don't POST it back
+              setCart(serverItems);
+            }
+            hasMergedLocalCart.current = true;
+          }
+        } catch (e) {
+          console.error("Failed to fetch server cart", e);
+        }
+      };
+      fetchServerCart();
+    }
+  }, [user, isInitialized, syncWithServer]);
+
+  // 3. Sync to LocalStorage and Server on changes
+  useEffect(() => {
+    if (!isInitialized) return;
+
+    localStorage.setItem('cart', JSON.stringify(cart));
+    
+    if (user && hasMergedLocalCart.current) {
+      if (skipSyncRef.current) {
+        skipSyncRef.current = false;
+        return;
+      }
+
+      // Debounce server sync
+      if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+      syncTimeoutRef.current = setTimeout(() => {
+        syncWithServer(cart);
+      }, 1000);
+    }
+
+    return () => {
+      if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+    };
+  }, [cart, isInitialized, user, syncWithServer]);
 
   const addToCart = (item: CartItem) => {
     setCart((prev) => {
@@ -136,7 +153,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const removeFromCart = (index: number, quantity: number = 1) => {
     setCart((prev) => {
       const newCart = [...prev];
-      if (newCart[index].quantity > quantity) {
+      if (newCart[index] && newCart[index].quantity > quantity) {
         newCart[index] = { ...newCart[index], quantity: newCart[index].quantity - quantity };
         return newCart;
       }

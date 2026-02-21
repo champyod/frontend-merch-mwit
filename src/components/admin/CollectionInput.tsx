@@ -5,6 +5,7 @@ import { UseFormReturn } from "react-hook-form";
 import { useState } from "react";
 import { IFormInputs } from "./AddProductForm";
 import { API_BASE_URL } from "@/lib/env";
+import { useCollections } from "@/hooks/useAdmin";
 
 type GetBrandResponse = {
 	errorMessage: string;
@@ -18,19 +19,12 @@ interface Props {
 	form: UseFormReturn<IFormInputs>;
 }
 
-export function BrandInput({ form }: Props) {
+export function CollectionInput({ form }: Props) {
 	const { register, setValue, watch } = form;
 	const [inputText, setInputText] = useState("");
 	const [selectValue, setSelectValue] = useState("");
 
-	const { data } = useQuery<any, any, GetBrandResponse, any>({
-		queryKey: ["brands"],
-		queryFn: async () => {
-			const res = await fetch(`${API_BASE_URL}/brand`);
-			const data = await res.json();
-			return data;
-		},
-	});
+	const { data } = useCollections();
 
 	if (!data)
 		return (
@@ -39,14 +33,14 @@ export function BrandInput({ form }: Props) {
 				autoComplete="off"
 				placeholder="Loading..."
 				id="brand"
-				className="border-2 border-black p-2 w-full rounded-lg"
+				className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white"
 			/>
 		);
 
-	const brandArr =
+	const collectionArr =
 		inputText.length === 0
-			? data.payload
-			: data.payload.filter(({ name }) => {
+			? data
+			: data.filter(({ name }: { name: string }) => {
 					const removeNonLetters = (str: string) =>
 						str.replace(/[^a-zA-Z]/g, "");
 					const removeSpaces = (str: string) =>
@@ -68,7 +62,7 @@ export function BrandInput({ form }: Props) {
 				autoComplete="off"
 				placeholder="Type to filter"
 				id="brand"
-				className="border-x-2 border-t-2 border-black p-2 w-full rounded-t-lg outline-none"
+				className="w-full bg-white/5 border-x border-t border-white/10 rounded-t-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#58a076]/50 transition-all outline-none"
 				{...register("brand", { required: true })}
 				onChange={(event) => {
 					setInputText(formatInput(event.target.value));
@@ -79,19 +73,19 @@ export function BrandInput({ form }: Props) {
 			<select
 				onChange={(event) => setValue("brand", event.target.value)}
 				id="brand"
-				className="w-full bg-white p-2 border-l-2 border-r-2 border-b-2 border-black rounded-b-lg bg-slate-100 outline-none mb-2"
+				className="w-full bg-white/5 border-x border-b border-white/10 rounded-b-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#58a076]/50 appearance-none cursor-pointer outline-none mb-2"
 				value={selectValue}
 			>
-				<option value={""} disabled={true}>
-					{brandArr.length !== 0
-						? `Suggestions (${brandArr.length})`
+				<option value={""} disabled={true} className="bg-[#0a2735]">
+					{collectionArr.length !== 0
+						? `Suggestions (${collectionArr.length})`
 						: `${(inputText || watch("brand")).slice(
 								0,
 								5
 						  )}... will be added after submit`}
 				</option>
-				{brandArr.map(({ name }) => (
-					<option value={name} key={name}>
+				{collectionArr.map(({ name }: { name: string }) => (
+					<option value={name} key={name} className="bg-[#0a2735]">
 						{name}
 					</option>
 				))}

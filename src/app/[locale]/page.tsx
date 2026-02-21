@@ -4,15 +4,18 @@ import ItemCard from "@/components/ui/ItemCard";
 import { BRAND_NAME } from "@/config";
 import { ShoppingBag, ChevronDown } from "lucide-react";
 import { Box, Card, Heading, Button, Text, Container, Flex, Stack } from "@/components/ui/primitives";
-import { useIntlayer } from "next-intlayer";
+import { useIntlayer, useLocale } from "next-intlayer";
 import Link from "next/link";
 import { useAllProducts } from "@/hooks/useProducts";
 import { useSite } from "@/hooks/useSite";
+import { buildLocalePath, normalizeLocale } from "@/lib/navigation";
 
 export default function Home() {
 	const t = useIntlayer("home");
 	const { data: items } = useAllProducts();
 	const { data: site } = useSite();
+	const localeData = useLocale();
+	const locale = normalizeLocale(localeData);
 
 	const backgroundImageUrl = site?.image_url || "/images/hero.webp";
 
@@ -43,13 +46,13 @@ export default function Home() {
 						</Text>
 
 						<Flex direction="col" className="sm:flex-row justify-center pt-4" gap={4}>
-							<Box as="a" href="#products">
+							<Box as="a" href={buildLocalePath(locale, "/#products")}>
 								<Button variant="primary" size="lg" className="gap-2">
 									<ShoppingBag className="w-5 h-5" />
 									{t.shopNow.value}
 								</Button>
 							</Box>
-							<Link href="/pre-orders">
+							<Link href={buildLocalePath(locale, "/pre-orders")}>
 								<Button variant="secondary" size="lg">
 									{t.viewPreorders.value}
 								</Button>

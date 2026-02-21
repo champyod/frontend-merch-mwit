@@ -1,7 +1,7 @@
 import { t, type DeclarationContent } from "intlayer";
 
-const dashboardContent: DeclarationContent = {
-	key: "dashboard",
+const adminContent: DeclarationContent = {
+	key: "admin",
 	content: {
 		// Common
 		backToProducts: t({
@@ -62,9 +62,9 @@ const dashboardContent: DeclarationContent = {
 			en: "Price (THB)*",
 			th: "ราคา (บาท)*",
 		}),
-		brand: t({
-			en: "Brand*",
-			th: "แบรนด์*",
+		collection: t({
+			en: "Collection*",
+			th: "คอลเลกชัน*",
 		}),
 		paymentAccount: t({
 			en: "Linking Payment Account*",
@@ -125,4 +125,4 @@ const dashboardContent: DeclarationContent = {
 	},
 };
 
-export default dashboardContent;
+export default adminContent;

@@ -5,8 +5,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowUpRight, Tag } from "lucide-react";
 import { Box, Flex, Stack, Text, Heading, Badge } from "@/components/ui/primitives";
-import { useIntlayer } from "next-intlayer";
+import { useIntlayer, useLocale } from "next-intlayer";
 import { calculateSalePrice, formatCurrency } from "@/lib/logic";
+import { buildLocalePath, normalizeLocale } from "@/lib/navigation";
 
 interface Props {
 	item: Item;
@@ -15,7 +16,9 @@ interface Props {
 export default function ItemCard({ item }: Props) {
 	const { id, title, price, url } = item;
 	const { sale } = useIntlayer("product");
-	const href = "/shop/" + title.replaceAll(" ", "-") + "-" + id;
+	const localeData = useLocale();
+	const locale = normalizeLocale(localeData);
+	const href = buildLocalePath(locale, "/shop/" + title.replaceAll(" ", "-") + "-" + id);
 
 	const salePrice = calculateSalePrice(item);
 
@@ -34,7 +37,7 @@ export default function ItemCard({ item }: Props) {
 
 				{/* Image */}
 				<Image
-					src={url || "/images/logo.webp"}
+					src={url || "/logo.png"}
 					alt={title}
 					fill
 					className="object-cover transition-transform duration-700 group-hover:scale-110"

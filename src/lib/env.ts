@@ -19,6 +19,6 @@ export const getEnv = (key: keyof Env): string => {
   return process.env[key as string] || "";
 };
 
-export const API_BASE_URL = getEnv("NEXT_PUBLIC_API_BASE_URL");
+export const API_BASE_URL = getEnv("NEXT_PUBLIC_API_BASE_URL") || "/api";
 export const API_HOST = API_BASE_URL.replace(/\/api$/, "");
 export const PROMPTPAY_ID = getEnv("PROMPTPAY_ID");

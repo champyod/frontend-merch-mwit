@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { Text } from "./primitives";
+import { useLocale } from "next-intlayer";
+import { buildLocalePath, normalizeLocale } from "@/lib/navigation";
 
 interface NavLinkProps {
 	href: string;
@@ -7,10 +9,15 @@ interface NavLinkProps {
 }
 
 const NavLink = ({ href, text }: NavLinkProps) => {
+	const localeData = useLocale();
+	const locale = normalizeLocale(localeData);
+
+	const localizedHref = buildLocalePath(locale, href);
+
 	return (
 		<Link
 			className="px-4 py-2 rounded-xl transition-all duration-300 hover:bg-white/5 group"
-			href={href.toLowerCase()}
+			href={localizedHref.toLowerCase()}
 		>
 			<Text 
 				size="sm" 

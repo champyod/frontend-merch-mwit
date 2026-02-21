@@ -20,35 +20,14 @@ export default function OrderDetailPage() {
 	
 	const { data: order, isLoading: isFetching } = useMyOrder(orderId, !!user);
 
-	const {
-		backToOrders,
-		orderNumber,
-		viewInvoice,
-		trackProgress,
-		trackingNumber,
-		trackShipment,
-		orderSummary,
-		subtotal,
-		shippingCost,
-		total,
-		adminNote,
-		customer,
-		shipping,
-		method,
-		address,
-		nameLabel,
-		socialLabel,
-		contactLabel,
-		noAddress,
-		orderNotFound
-	} = useIntlayer("order-detail");
+	const t = useIntlayer("order-detail");
 
 	if (isAuthLoading || (isFetching && user)) return <Loader />;
 	
 	if (!order) {
 		return (
 			<Flex className="min-h-screen bg-[#0a2735]" justifyContent="center" alignItems="center">
-				<Text weight="bold" color="text-white">{orderNotFound.value}</Text>
+				<Text weight="bold" color="text-white">{t.orderNotFound.value}</Text>
 			</Flex>
 		);
 	}
@@ -72,14 +51,14 @@ export default function OrderDetailPage() {
 					className="inline-flex items-center gap-2 text-white/40 hover:text-white font-bold transition-colors mb-8"
 				>
 					<ChevronLeft className="w-5 h-5" />
-					{backToOrders.value}
+					{t.backToOrders.value}
 				</Link>
 
 				<Flex className="flex-col md:flex-row mb-10" justifyContent="between" alignItems="end" gap={6}>
 					<Stack gap={2}>
 						<Flex gap={3}>
 							<Heading level={1} size="4xl" className="text-white">
-								{orderNumber.value}{order.id}
+								{t.orderNumber.value}{order.id}
 							</Heading>
 							<Box className={`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${getStatusColor(order.status)}`}>
 								{order.status}
@@ -93,7 +72,7 @@ export default function OrderDetailPage() {
 					<Flex gap={3}>
 						<Box className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-white/5 border border-white/10 text-white/60 text-sm font-bold hover:bg-white/10 transition-all cursor-pointer">
 							<Receipt className="w-4 h-4" />
-							{viewInvoice.value}
+							{t.viewInvoice.value}
 						</Box>
 					</Flex>
 				</Flex>
@@ -101,7 +80,7 @@ export default function OrderDetailPage() {
 				{/* Status Stepper Card */}
 				<Card className="p-8 md:p-12 mb-8 shadow-2xl">
 					<Heading level={2} size="lg" className="text-white mb-12 text-center">
-						{trackProgress.value}
+						{t.trackProgress.value}
 					</Heading>
 					<OrderStatusStepper currentStatus={order.status} />
 					
@@ -110,7 +89,7 @@ export default function OrderDetailPage() {
 							<Flex className="flex-col md:flex-row" justifyContent="between" alignItems="center" gap={6}>
 								<Stack gap={1}>
 									<Text size="xs" weight="bold" color="text-white/40" uppercase tracking="widest" className="text-center md:text-left">
-										{trackingNumber.value}
+										{t.trackingNumber.value}
 									</Text>
 									<Text size="2xl" weight="black" color="text-[#58a076]" className="text-center md:text-left">
 										{order.tracking_no}
@@ -120,7 +99,7 @@ export default function OrderDetailPage() {
 									href="#"
 									className="flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-[#58a076]/10 text-[#58a076] font-bold border border-[#58a076]/20 hover:bg-[#58a076]/20 transition-all group"
 								>
-									{trackShipment.value}
+									{t.trackShipment.value}
 									<ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
 								</Link>
 							</Flex>
@@ -134,7 +113,7 @@ export default function OrderDetailPage() {
 						<Card className="p-8 shadow-xl">
 							<Heading level={3} size="lg" className="text-white mb-6 flex items-center gap-3">
 								<Package className="w-5 h-5 text-[#58a076]" />
-								{orderSummary.value}
+								{t.orderSummary.value}
 							</Heading>
 							<Stack gap={6}>
 								{order.items.map((item, idx) => (
@@ -167,15 +146,15 @@ export default function OrderDetailPage() {
 
 							<Box className="mt-8 pt-8 border-t border-white/5 space-y-4">
 								<Flex justifyContent="between">
-									<Text size="sm" weight="bold" color="text-white/40">{subtotal.value}</Text>
+									<Text size="sm" weight="bold" color="text-white/40">{t.subtotal.value}</Text>
 									<Text size="sm" color="text-white">฿{(order.total_price - order.shipping_cost).toLocaleString()}</Text>
 								</Flex>
 								<Flex justifyContent="between">
-									<Text size="sm" weight="bold" color="text-white/40">{shippingCost.value}</Text>
+									<Text size="sm" weight="bold" color="text-white/40">{t.shippingCost.value}</Text>
 									<Text size="sm" color="text-white">฿{order.shipping_cost.toLocaleString()}</Text>
 								</Flex>
 								<Flex justifyContent="between" alignItems="end" className="pt-2">
-									<Text size="lg" weight="bold" color="text-white">{total.value}</Text>
+									<Text size="lg" weight="bold" color="text-white">{t.total.value}</Text>
 									<Heading level={4} size="3xl" weight="black" color="text-[#58a076]">฿{order.total_price.toLocaleString()}</Heading>
 								</Flex>
 							</Box>
@@ -184,7 +163,7 @@ export default function OrderDetailPage() {
 						{order.note && (
 							<Box className="bg-[#58a076]/5 border border-[#58a076]/20 rounded-3xl p-6">
 								<Text size="xs" weight="black" color="text-[#58a076]" uppercase tracking="widest" className="block mb-3">
-									{adminNote.value}
+									{t.adminNote.value}
 								</Text>
 								<Text size="sm" color="text-white/80" className="leading-relaxed italic">
 									"{order.note}"
@@ -198,19 +177,19 @@ export default function OrderDetailPage() {
 						<Card className="p-8 shadow-xl">
 							<Heading level={3} size="lg" className="text-white mb-6 flex items-center gap-3">
 								<User className="w-5 h-5 text-[#58a076]" />
-								{customer.value}
+								{t.customer.value}
 							</Heading>
 							<Stack gap={4}>
 								<Stack gap={1}>
-									<Text size="xs" weight="bold" color="text-white/20" uppercase tracking="widest">{nameLabel.value}</Text>
+									<Text size="xs" weight="bold" color="text-white/20" uppercase tracking="widest">{t.nameLabel.value}</Text>
 									<Text size="sm" weight="bold" color="text-white">{order.customer_name}</Text>
 								</Stack>
 								<Stack gap={1}>
-									<Text size="xs" weight="bold" color="text-white/20" uppercase tracking="widest">{socialLabel.value}</Text>
+									<Text size="xs" weight="bold" color="text-white/20" uppercase tracking="widest">{t.socialLabel.value}</Text>
 									<Text size="sm" weight="bold" color="text-white">{order.social}</Text>
 								</Stack>
 								<Stack gap={1}>
-									<Text size="xs" weight="bold" color="text-white/20" uppercase tracking="widest">{contactLabel.value}</Text>
+									<Text size="xs" weight="bold" color="text-white/20" uppercase tracking="widest">{t.contactLabel.value}</Text>
 									<Flex gap={2}>
 										<Phone className="w-3.5 h-3.5 text-[#58a076]" />
 										<Text size="sm" weight="bold" color="text-white">{order.contact_number}</Text>
@@ -222,19 +201,19 @@ export default function OrderDetailPage() {
 						<Card className="p-8 shadow-xl">
 							<Heading level={3} size="lg" className="text-white mb-6 flex items-center gap-3">
 								<MapPin className="w-5 h-5 text-[#58a076]" />
-								{shipping.value}
+								{t.shipping.value}
 							</Heading>
 							<Stack gap={4}>
 								<Stack gap={1}>
-									<Text size="xs" weight="bold" color="text-white/20" uppercase tracking="widest">{method.value}</Text>
+									<Text size="xs" weight="bold" color="text-white/20" uppercase tracking="widest">{t.method.value}</Text>
 									<Box className="w-fit px-2.5 py-1 rounded-lg bg-white/5 text-[10px] font-black text-[#58a076] uppercase tracking-widest">
 										{order.shipping_method}
 									</Box>
 								</Stack>
 								<Stack gap={1}>
-									<Text size="xs" weight="bold" color="text-white/20" uppercase tracking="widest">{address.value}</Text>
+									<Text size="xs" weight="bold" color="text-white/20" uppercase tracking="widest">{t.address.value}</Text>
 									<Text size="sm" weight="bold" color="text-white/70" className="leading-relaxed">
-										{order.address || noAddress.value}
+										{order.address || t.noAddress.value}
 									</Text>
 								</Stack>
 							</Stack>

@@ -17,7 +17,8 @@ export default function OrdersPage() {
 
 	const { title, subtitle } = useIntlayer("orders-list");
 
-	if (isAuthLoading || (isFetching && user)) return <Loader />;
+	// Only show loader on initial load
+	if (isAuthLoading || (isFetching && orders.length === 0)) return <Loader />;
 
 	return (
 		<Box className="min-h-screen bg-[#0a2735] pt-32 pb-20 px-4">

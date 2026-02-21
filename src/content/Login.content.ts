@@ -19,10 +19,6 @@ const loginContent: DeclarationContent = {
 			en: "Continue with Google",
 			th: "ดำเนินการต่อด้วย Google",
 		}),
-		secureNotice: t({
-			en: "Google OAuth 2.0 Secure Login",
-			th: "เข้าสู่ระบบอย่างปลอดภัยด้วย Google OAuth 2.0",
-		}),
 	},
 };
 

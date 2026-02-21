@@ -6,7 +6,9 @@ import { Locales } from "intlayer";
 import { Languages } from "lucide-react";
 
 export default function LocaleSwitcher() {
-  const { locale, setLocale } = useLocale();
+  const localeData = useLocale();
+  const locale = localeData?.locale || Locales.THAI;
+  const setLocale = localeData?.setLocale || (() => {});
 
   const toggleLocale = () => {
     const nextLocale = locale === Locales.ENGLISH ? Locales.THAI : Locales.ENGLISH;

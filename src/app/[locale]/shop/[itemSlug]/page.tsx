@@ -8,9 +8,10 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata({
 	params,
 }: {
-	params: { itemSlug: string };
+	params: Promise<{ itemSlug: string }>;
 }): Promise<Metadata> {
-	const itemSlugArr = params.itemSlug.split("-");
+	const { itemSlug } = await params;
+	const itemSlugArr = itemSlug.split("-");
 	const itemId = itemSlugArr[itemSlugArr.length - 1];
 	const item = await getItem(itemId);
 
@@ -48,8 +49,9 @@ async function getItem(itemId: string) {
 	}
 }
 
-export default function ItemPage({ params }: { params: { itemSlug: string } }) {
-	const itemSlugArr = params.itemSlug.split("-");
+export default async function ItemPage({ params }: { params: Promise<{ itemSlug: string }> }) {
+	const { itemSlug } = await params;
+	const itemSlugArr = itemSlug.split("-");
 	const itemId = itemSlugArr[itemSlugArr.length - 1].trim();
 
 	return <ItemPageClient itemId={itemId} />;

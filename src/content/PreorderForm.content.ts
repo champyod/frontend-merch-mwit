@@ -49,6 +49,14 @@ const preorderContent: DeclarationContent = {
     socialRequired: t({ en: "Social contact is required", th: "กรุณากรอกช่องทางติดต่อ" }),
     phoneRequired: t({ en: "Phone number is required", th: "กรุณากรอกเบอร์โทรศัพท์" }),
     addressRequired: t({ en: "Address is required for postal shipping", th: "กรุณากรอกที่อยู่สำหรับการจัดส่ง" }),
+
+    // Auth Required
+    authRequiredTitle: t({ en: "Sign in to Checkout", th: "เข้าสู่ระบบเพื่อสั่งซื้อ" }),
+    authRequiredDesc: t({ 
+      en: "Please sign in with your Google account to complete your order and track its status.", 
+      th: "กรุณาเข้าสู่ระบบด้วยบัญชี Google เพื่อสั่งซื้อสินค้าและติดตามสถานะการจัดส่ง" 
+    }),
+    loginButton: t({ en: "Sign in with Google", th: "เข้าสู่ระบบด้วย Google" }),
   },
 };
 

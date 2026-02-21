@@ -1,14 +1,13 @@
 "use client";
 
-import { EditProductForm } from "@/components/dashboard/EditProductForm";
+import { EditProductForm } from "@/components/admin/EditProductForm";
 import Loader from "@/components/ui/Loader";
 import { useQuery } from "@tanstack/react-query";
+import { use } from "react";
+import { API_BASE_URL } from "@/lib/env";
 
-interface Props {
-	params: { itemId: string };
-}
-export default function EditItemPage({ params }: Props) {
-	const itemId = params.itemId;
+export default function EditItemPage({ params }: { params: Promise<{ itemId: string }> }) {
+	const { itemId } = use(params);
 
 	const {
 		data: product,
@@ -17,7 +16,7 @@ export default function EditItemPage({ params }: Props) {
 	} = useQuery({
 		queryKey: ["editProduct", itemId],
 		queryFn: async () => {
-			const response = await fetch(`/api/product/${itemId}`);
+			const response = await fetch(`${API_BASE_URL}/products/${itemId}`);
 			return await response.json();
 		},
 		select: (productResponse) => productResponse.payload,

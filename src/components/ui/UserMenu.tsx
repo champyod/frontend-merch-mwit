@@ -6,10 +6,14 @@ import { useAuth } from "@/contexts/auth-context";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingBag, LogOut, LayoutDashboard, ChevronDown } from "lucide-react";
 import Image from "next/image";
+import { useLocale } from "next-intlayer";
+import { buildLocalePath, normalizeLocale } from "@/lib/navigation";
 
 export default function UserMenu() {
 	const { user, logout } = useAuth();
 	const [isOpen, setIsOpen] = useState(false);
+	const localeData = useLocale();
+	const locale = normalizeLocale(localeData);
 
 	if (!user) return null;
 
@@ -53,7 +57,7 @@ export default function UserMenu() {
 							</div>
 
 							<Link
-								href="/orders"
+								href={buildLocalePath(locale, "/orders")}
 								onClick={() => setIsOpen(false)}
 								className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-white/70 hover:text-white hover:bg-white/5 transition-all"
 							>
@@ -63,7 +67,7 @@ export default function UserMenu() {
 
 							{user.role === "admin" && (
 								<Link
-									href="/dashboard"
+									href={buildLocalePath(locale, "/admin")}
 									onClick={() => setIsOpen(false)}
 									className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-white/70 hover:text-white hover:bg-white/5 transition-all"
 								>

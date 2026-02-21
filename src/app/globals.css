@@ -1,35 +1,67 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --color-primary: #58a076;
+  --color-primary-dark: #217c6b;
+  --color-secondary: #a9c081;
+  --color-navy: #0a2735;
+  --color-teal-dark: #18666a;
+  --color-mint: #92c9c4;
+  --color-coral: #ec848c;
+  --color-yellow: #e9dd67;
+
+  --color-background: #0a2735;
+  --color-foreground: #ffffff;
+  
+  --color-border: rgba(146, 201, 196, 0.2);
+  --color-input: rgba(146, 201, 196, 0.1);
+  --color-ring: #58a076;
+  
+  --color-muted: rgba(146, 201, 196, 0.1);
+  --color-muted-foreground: rgba(255, 255, 255, 0.4);
+  
+  --color-accent: rgba(88, 160, 118, 0.2);
+  --color-accent-foreground: #ffffff;
+  
+  --color-popover: #0a2735;
+  --color-popover-foreground: #ffffff;
+  
+  --color-card: rgba(24, 102, 106, 0.2);
+  --color-card-foreground: #ffffff;
+
+  --font-sans: var(--font-ibm-plex-sans-thai), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-default: var(--font-ibm-plex-sans-thai), var(--font-inter), system-ui, sans-serif;
+  --font-plex: var(--font-ibm-plex-sans-thai), sans-serif;
+  --font-noto: var(--font-noto-sans-thai), sans-serif;
+  --font-krub: var(--font-krub), sans-serif;
+  --font-mitr: var(--font-mitr), sans-serif;
+  --font-itim: var(--font-itim), sans-serif;
+}
 
 :root {
   --radius: 0.75rem;
-  /* OPH 2025 Palette */
-  --primary: #58a076;
-  --primary-dark: #217c6b;
-  --secondary: #a9c081;
-  --navy: #0a2735;
-  --teal-dark: #18666a;
-  --mint: #92c9c4;
-  --coral: #ec848c;
-  --yellow: #e9dd67;
-  
-  --background: #0a2735;
-  --foreground: #ffffff;
-  
-  --card: rgba(24, 102, 106, 0.2);
-  --card-border: rgba(146, 201, 196, 0.2);
 }
 
-body {
-  color: var(--foreground);
-  background-color: var(--background);
-  background-image: 
-    radial-gradient(circle at 0% 0%, rgba(33, 124, 107, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 100% 100%, rgba(88, 160, 118, 0.1) 0%, transparent 50%);
-  background-attachment: fixed;
-  min-height: 100vh;
-  font-feature-settings: "cv11", "ss01";
+@layer base {
+  * {
+    font-family: var(--font-default) !important;
+  }
+  body {
+    background-color: #0a2735;
+    color: #ffffff;
+    background-image: 
+      radial-gradient(circle at 0% 0%, rgba(33, 124, 107, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 100% 100%, rgba(88, 160, 118, 0.1) 0%, transparent 50%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 }
 
 @layer components {

@@ -2,21 +2,21 @@
 
 import Loader from "@/components/ui/Loader";
 import TextLoader from "@/components/ui/TextLoader";
-import useRedirect from "@/hooks/useRedirect";
+import { useAuth } from "@/contexts/auth-context";
 import { Item } from "@/types/types";
 import Link from "next/link";
 import { useState } from "react";
 import { useProducts } from "@/hooks/useProducts";
-import { useBrands } from "@/hooks/useAdmin";
+import { useCollections } from "@/hooks/useAdmin";
 import { Box, Card, Heading, Text, Button, Stack, Container, Flex, Grid, Badge } from "@/components/ui/primitives";
 import { calculateSalePrice } from "@/lib/logic";
 
 export default function ProductsPage() {
-	const { user, isLoading: isAuthLoading } = useRedirect({});
-	const [brandName, setBrandName] = useState("");
+	const { user, isLoading: isAuthLoading } = useAuth();
+	const [collectionName, setCollectionName] = useState("");
 
-	const { data: products = [] } = useProducts(brandName);
-	const { data: brands = [] } = useBrands(!!user);
+	const { data: products = [] } = useProducts(collectionName);
+	const { data: collections = [] } = useCollections(!!user);
 
 	if (isAuthLoading || !user) return <Loader />;
 
@@ -24,7 +24,7 @@ export default function ProductsPage() {
 		<Box className="pb-20">
 			<Flex justifyContent="between" alignItems="center" className="mb-8">
 				<Heading level={1} size="3xl" color="text-white">Products</Heading>
-				<Link href="/dashboard/products/add">
+				<Link href="/admin/products/add">
 					<Button variant="primary" size="md">+ Add Product</Button>
 				</Link>
 			</Flex>
@@ -35,14 +35,15 @@ export default function ProductsPage() {
 						<Text weight="bold" size="lg" color="text-white" className="block mb-4">My Inventory</Text>
 						
 						<Stack gap={2}>
-							<label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Filter by brand</label>
+							<label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Filter by collection</label>
 							<select
-								onChange={({ target }) => setBrandName(target.value)}
-								value={brandName}
+								aria-label="Filter products by collection"
+								onChange={({ target }) => setCollectionName(target.value)}
+								value={collectionName}
 								className="bg-white/5 border border-white/10 rounded-xl p-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#58a076]/50 w-full max-w-xs"
 							>
-								<option value="" className="bg-[#0a2735]">All Brands</option>
-								{brands.map(({ name }: { name: string }) => (
+								<option value="" className="bg-[#0a2735]">All Collections</option>
+								{collections.map(({ name }: { name: string }) => (
 									<option key={name} value={name} className="bg-[#0a2735]">
 										{name}
 									</option>
@@ -82,7 +83,7 @@ function ItemCard({ item }: { item: Item }) {
 		slug,
 		text,
 	} = item;
-	const href = "/dashboard/edit/" + id;
+	const href = "/admin/products/edit/" + id;
 
 	const salePrice = calculateSalePrice(item);
 

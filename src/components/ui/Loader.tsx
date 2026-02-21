@@ -1,16 +1,28 @@
 import Image from "next/image";
+import { Box, Stack, Text } from "./primitives";
 
 export default function Loader() {
     return (
-        <div className="bg-secondary min-h-[150vh] absolute top-0 left-0 right-0 w-full overflow-hidden">
-            <Image
-                priority
-                className="drop-shadow-lg animate-bounce w-auto h-auto m-auto pt-[40vh]"
-                src={'/images/logo.png'}
-                width={100}
-                height={100}
-                alt="Loader" />
-            <p className="pt-5 text-xl font-bold text-center">Loading...</p>
-        </div>
+        <Box className="flex items-center justify-center min-h-[60vh] w-full">
+            <Stack gap={6} alignItems="center">
+                <div className="relative group">
+                    <div
+                        className="absolute inset-0 rounded-2xl bg-[#58a076]/10 blur-xl scale-150 animate-pulse"
+                        style={{ animationDuration: '3s' }}
+                    />
+                    <Image
+                        priority
+                        className="relative drop-shadow-2xl animate-pulse"
+                        src={'/logo.png'}
+                        width={80}
+                        height={80}
+                        alt="Loading..."
+                    />
+                </div>
+                <Text size="lg" weight="bold" color="text-white/40" className="animate-pulse tracking-widest uppercase">
+                    Loading
+                </Text>
+            </Stack>
+        </Box>
     )
 }

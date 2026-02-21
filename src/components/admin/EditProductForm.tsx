@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
 import { ImagesUpload } from "./ImagesUpload";
-import { BrandInput } from "./BrandInput";
+import { CollectionInput } from "./CollectionInput";
 import { ColorSizeInput } from "./ColorSizeInput";
 import { PageInput } from "./PageInput";
 import { Box, Card, Heading, Button, Stack, Grid, Text } from "@/components/ui/primitives";
@@ -12,9 +12,10 @@ import { Item } from "@/types/types";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, Trash2 } from "lucide-react";
-import { useIntlayer } from "next-intlayer";
+import { useIntlayer, useLocale } from "next-intlayer";
 import { usePaymentAccounts } from "@/hooks/useAdmin";
 import { API_BASE_URL } from "@/lib/env";
+import { navigateWithLocale } from "@/lib/navigation";
 
 export interface IFormInputs {
 	title: string;
@@ -35,10 +36,22 @@ export interface IFormInputs {
 	payment_account_id: string;
 }
 
+const normalizeLocale = (value: unknown): "th" | "en" => {
+	if (value === "en") return "en";
+	if (value === "th") return "th";
+	return "th";
+};
+
 export function EditProductForm({ product }: { product: Item }) {
 	const router = useRouter();
 	const [isLoading, setIsLoading] = useState(false);
-	const t = useIntlayer("dashboard");
+	const t = useIntlayer("admin");
+	const localeData = useLocale();
+	const locale = normalizeLocale(
+		typeof localeData === "string"
+			? localeData
+			: (localeData as { locale?: string } | undefined)?.locale
+	);
 	const { data: paymentAccounts = [] } = usePaymentAccounts();
 
 	const form = useForm<IFormInputs>({
@@ -98,7 +111,7 @@ export function EditProductForm({ product }: { product: Item }) {
 				method: "DELETE",
 			});
 			toast.success(t.productDeleted.value);
-			router.push("/dashboard/products");
+			navigateWithLocale(router, locale, "/admin/products");
 		} catch (e) {
 			toast.error("Delete failed");
 		}
@@ -107,7 +120,7 @@ export function EditProductForm({ product }: { product: Item }) {
 	return (
 		<form onSubmit={form.handleSubmit(onSubmit)}>
 			<Stack gap={6} className="max-w-4xl mx-auto pb-20">
-				<Link href="/dashboard/products" className="flex items-center text-slate-400 hover:text-white transition-colors text-sm font-bold">
+				<Link href={`/${locale}/admin/products`} className="flex items-center text-slate-400 hover:text-white transition-colors text-sm font-bold">
 					<ChevronLeft className="w-4 h-4 mr-1" /> {t.backToProducts.value}
 				</Link>
 				
@@ -150,8 +163,8 @@ export function EditProductForm({ product }: { product: Item }) {
 										/>
 									</Stack>
 									<Stack gap={2}>
-										<label className="text-sm font-medium text-slate-400">{t.brand.value}</label>
-										<BrandInput form={form} />
+										<label className="text-sm font-medium text-slate-400">{t.collection.value}</label>
+										<CollectionInput form={form} />
 									</Stack>
 								</Grid>
 								<Stack gap={2}>
