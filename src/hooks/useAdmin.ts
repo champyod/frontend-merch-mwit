@@ -208,18 +208,22 @@ export const useDisablePaymentAccount = () => {
 	});
 };
 
-const fetchAdminOverview = async (): Promise<AdminOverview> => {
-	const res = await fetch(`${API_BASE_URL}/admin/analytics/overview`);
+const fetchAdminOverview = async (params?: { from?: string; to?: string }): Promise<AdminOverview> => {
+	const query = new URLSearchParams();
+	if (params?.from) query.set("from", params.from);
+	if (params?.to) query.set("to", params.to);
+	const queryString = query.toString();
+	const res = await fetch(`${API_BASE_URL}/admin/analytics/overview${queryString ? `?${queryString}` : ""}`);
 	if (!res.ok) throw new Error("Failed to fetch overview");
 	const data: ApiResponse<AdminOverview> = await res.json();
 	if (data.hasError) throw new Error(data.errorMessage || "Failed to fetch overview");
 	return data.payload;
 };
 
-export const useAdminOverview = (enabled: boolean = true) => {
+export const useAdminOverview = (params?: { from?: string; to?: string }, enabled: boolean = true) => {
 	return useQuery({
-		queryKey: ["admin-overview"],
-		queryFn: fetchAdminOverview,
+		queryKey: ["admin-overview", params?.from || "", params?.to || ""],
+		queryFn: () => fetchAdminOverview(params),
 		enabled,
 	});
 };

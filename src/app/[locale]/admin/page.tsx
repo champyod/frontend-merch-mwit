@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import Loader from "@/components/ui/Loader";
 import { useAuth } from "@/contexts/auth-context";
 import Link from "next/link";
@@ -7,11 +8,36 @@ import { useAdminOverview } from "@/hooks/useAdmin";
 import { useLocale } from "next-intlayer";
 import { normalizeLocale } from "@/lib/navigation";
 
+const toISODate = (date: Date): string => date.toISOString().slice(0, 10);
+
+const toStartOfDayRFC3339 = (dateValue: string): string => {
+	return `${dateValue}T00:00:00Z`;
+};
+
+const toEndOfDayRFC3339 = (dateValue: string): string => {
+	return `${dateValue}T23:59:59Z`;
+};
+
 export default function DashboardPage() {
 	const localeData = useLocale();
 	const locale = normalizeLocale(localeData);
+	const defaultTo = useMemo(() => toISODate(new Date()), []);
+	const defaultFrom = useMemo(() => {
+		const date = new Date();
+		date.setDate(date.getDate() - 30);
+		return toISODate(date);
+	}, []);
+	const [fromDate, setFromDate] = useState(defaultFrom);
+	const [toDate, setToDate] = useState(defaultTo);
+	const [appliedRange, setAppliedRange] = useState({ from: defaultFrom, to: defaultTo });
 	const { user, isLoading } = useAuth();
-	const { data: overview } = useAdminOverview(!!user && !isLoading);
+	const { data: overview } = useAdminOverview(
+		{
+			from: toStartOfDayRFC3339(appliedRange.from),
+			to: toEndOfDayRFC3339(appliedRange.to),
+		},
+		!!user && !isLoading,
+	);
 
 	if (isLoading || !user) return <Loader />;
 
@@ -20,6 +46,37 @@ export default function DashboardPage() {
 			<h1 className="text-2xl pb-1 font-bold">
 									Hi <i>{user.name || user.role}</i>
 								</h1>			<h2 className="text-3xl font-bold">Admin Panel</h2>
+			<div className="mt-4 mb-4 bg-white/10 p-3 rounded-lg border border-white/10">
+				<div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+					<div>
+						<label htmlFor="overview-from" className="text-xs text-white/60 uppercase">From</label>
+						<input
+							id="overview-from"
+							type="date"
+							value={fromDate}
+							onChange={(event) => setFromDate(event.target.value)}
+							className="mt-1 w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
+						/>
+					</div>
+					<div>
+						<label htmlFor="overview-to" className="text-xs text-white/60 uppercase">To</label>
+						<input
+							id="overview-to"
+							type="date"
+							value={toDate}
+							onChange={(event) => setToDate(event.target.value)}
+							className="mt-1 w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
+						/>
+					</div>
+					<button
+						type="button"
+						onClick={() => setAppliedRange({ from: fromDate, to: toDate })}
+						className="h-10.5 px-4 rounded-lg bg-emerald-500 text-white hover:bg-emerald-400"
+					>
+						Apply Range
+					</button>
+				</div>
+			</div>
 			<div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-6 mb-6">
 				<div className="bg-white/10 p-3 rounded-lg border border-white/10">
 					<p className="text-xs text-white/60 uppercase">Orders</p>
