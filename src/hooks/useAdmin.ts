@@ -40,6 +40,29 @@ export type AdminUser = {
 	is_active: boolean;
 };
 
+export type AdminSetItem = {
+	id?: number;
+	set_id?: number;
+	item_id: number;
+	quantity: number;
+	item?: Item;
+};
+
+export type AdminSet = {
+	id: number;
+	title: string;
+	description: string;
+	price: number;
+	is_preorder: number;
+	hidden: number;
+	enabled: number;
+	payment_account_id: number;
+	images?: { id?: number; url?: string; URL?: string }[];
+	items?: AdminSetItem[];
+	created_at?: string;
+	updated_at?: string;
+};
+
 // --- Preorders ---
 
 const fetchAdminPreorders = async (): Promise<Preorder[]> => {
@@ -195,6 +218,137 @@ export const useAdminUsers = (enabled: boolean = true) => {
 	return useQuery({
 		queryKey: ["admin-users"],
 		queryFn: fetchAdminUsers,
+		enabled,
+	});
+};
+
+const fetchAdminSets = async (search: string, status: string): Promise<AdminSet[]> => {
+	const params = new URLSearchParams();
+	if (search.trim()) params.set("search", search.trim());
+	if (status.trim()) params.set("status", status.trim());
+	const query = params.toString();
+	const res = await fetch(`${API_BASE_URL}/admin/sets${query ? `?${query}` : ""}`);
+	if (!res.ok) throw new Error("Failed to fetch sets");
+	const data: ApiResponse<AdminSet[]> = await res.json();
+	if (data.hasError) throw new Error(data.errorMessage || "Failed to fetch sets");
+	return data.payload || [];
+};
+
+export const useAdminSets = (search: string, status: string, enabled: boolean = true) => {
+	return useQuery({
+		queryKey: ["admin-sets", search, status],
+		queryFn: () => fetchAdminSets(search, status),
+		enabled,
+	});
+};
+
+const fetchAdminSetDetail = async (setId: string): Promise<AdminSet> => {
+	const res = await fetch(`${API_BASE_URL}/admin/sets/${setId}`);
+	if (!res.ok) throw new Error("Failed to fetch set details");
+	const data: ApiResponse<AdminSet> = await res.json();
+	if (data.hasError) throw new Error(data.errorMessage || "Failed to fetch set details");
+	return data.payload;
+};
+
+export const useAdminSetDetail = (setId: string, enabled: boolean = true) => {
+	return useQuery({
+		queryKey: ["admin-set", setId],
+		queryFn: () => fetchAdminSetDetail(setId),
+		enabled: enabled && !!setId,
+	});
+};
+
+export const useCreateSet = () => {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: async (payload: {
+			title: string;
+			description: string;
+			price: number;
+			is_preorder: boolean;
+			hidden: boolean;
+			enabled?: boolean;
+			image_urls: string[];
+			payment_account_id: number;
+			items: { item_id: number; quantity: number }[];
+		}) => {
+			const res = await fetch(`${API_BASE_URL}/admin/sets`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(payload),
+			});
+			if (!res.ok) {
+				const err = await res.json().catch(() => ({ error: "Failed to create set" }));
+				throw new Error(err.error || "Failed to create set");
+			}
+			return res.json();
+		},
+		onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-sets"] }),
+	});
+};
+
+export const useUpdateSet = () => {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: async ({
+			id,
+			payload,
+		}: {
+			id: number;
+			payload: {
+				title: string;
+				description: string;
+				price: number;
+				is_preorder: boolean;
+				hidden: boolean;
+				enabled?: boolean;
+				image_urls: string[];
+				payment_account_id: number;
+				items: { item_id: number; quantity: number }[];
+			};
+		}) => {
+			const res = await fetch(`${API_BASE_URL}/admin/sets/${id}`, {
+				method: "PUT",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(payload),
+			});
+			if (!res.ok) {
+				const err = await res.json().catch(() => ({ error: "Failed to update set" }));
+				throw new Error(err.error || "Failed to update set");
+			}
+			return res.json();
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["admin-sets"] });
+			queryClient.invalidateQueries({ queryKey: ["admin-set"] });
+		},
+	});
+};
+
+export const useDisableSet = () => {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: async (id: number) => {
+			const res = await fetch(`${API_BASE_URL}/admin/sets/${id}`, { method: "DELETE" });
+			if (!res.ok) throw new Error("Failed to disable set");
+			return res.json();
+		},
+		onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-sets"] }),
+	});
+};
+
+const fetchAdminProductsForSet = async (): Promise<Item[]> => {
+	const res = await fetch(`${API_BASE_URL}/admin/products`);
+	if (!res.ok) throw new Error("Failed to fetch products for set");
+	const data: ApiResponse<Item[]> = await res.json();
+	if (data.hasError) throw new Error(data.errorMessage || "Failed to fetch products for set");
+	return data.payload || [];
+};
+
+export const useAdminProductsForSet = (enabled: boolean = true) => {
+	return useQuery({
+		queryKey: ["admin-products-for-set"],
+		queryFn: fetchAdminProductsForSet,
 		enabled,
 	});
 };

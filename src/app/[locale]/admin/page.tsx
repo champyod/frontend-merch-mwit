@@ -78,6 +78,25 @@ export default function DashboardPage() {
 			</Link>
 			<Link
 				className="border-2 border-black bg-white p-2 w-full rounded-lg mt-5 text-lg hover:drop-shadow-lg flex items-center justify-between"
+				href={"/admin/sets"}
+			>
+				<span>
+					Create/Edit <b>sets</b>.
+				</span>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="24"
+					height="24"
+					viewBox="0 0 1024 1024"
+				>
+					<path
+						fill="currentColor"
+						d="M754.752 480H160a32 32 0 1 0 0 64h594.752L521.344 777.344a32 32 0 0 0 45.312 45.312l288-288a32 32 0 0 0 0-45.312l-288-288a32 32 0 1 0-45.312 45.312z"
+					/>
+				</svg>
+			</Link>
+			<Link
+				className="border-2 border-black bg-white p-2 w-full rounded-lg mt-5 text-lg hover:drop-shadow-lg flex items-center justify-between"
 				href={"/admin/preorders"}
 			>
 				<span>
