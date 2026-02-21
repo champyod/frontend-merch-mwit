@@ -28,6 +28,17 @@ export type AdminOverview = {
 	visible_sets: number;
 	preorder_products: number;
 	preorder_sets: number;
+	top_products?: {
+		item_id: number;
+		title: string;
+		units_sold: number;
+	}[];
+	payment_breakdown?: {
+		payment_account_id: number;
+		name: string;
+		orders: number;
+		revenue: number;
+	}[];
 };
 
 export type AdminUser = {
