@@ -12,9 +12,9 @@ type ApiResponse<T> = {
 
 type GetProductsResponse = ApiResponse<Item[]>;
 
-const fetchProducts = async (brandName?: string): Promise<Item[]> => {
-	const url = brandName 
-		? `${API_BASE_URL}/products?brandName=${brandName}` 
+const fetchProducts = async (collectionName?: string): Promise<Item[]> => {
+	const url = collectionName 
+		? `${API_BASE_URL}/products?collectionName=${collectionName}` 
 		: `${API_BASE_URL}/products`;
 	const res = await fetch(url);
 	const data: GetProductsResponse = await res.json();
@@ -30,7 +30,7 @@ const fetchAllProducts = async (): Promise<Item[]> => {
 };
 
 const fetchProductsByPage = async (slug: string): Promise<Item[]> => {
-	const res = await fetch(`${API_BASE_URL}/products?brandName=${encodeURIComponent(slug)}`);
+	const res = await fetch(`${API_BASE_URL}/products?collectionName=${encodeURIComponent(slug)}`);
 	const data: GetProductsResponse = await res.json();
 	if (data.hasError) throw new Error(data.errorMessage);
 	return data.payload || [];
@@ -57,10 +57,10 @@ const fetchProduct = async (itemId: string): Promise<Item> => {
 	return data.payload;
 };
 
-export const useProducts = (brandName?: string) => {
+export const useProducts = (collectionName?: string) => {
 	return useQuery({
-		queryKey: ["products", brandName],
-		queryFn: () => fetchProducts(brandName),
+		queryKey: ["products", collectionName],
+		queryFn: () => fetchProducts(collectionName),
 	});
 };
 

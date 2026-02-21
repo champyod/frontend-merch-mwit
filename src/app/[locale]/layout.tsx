@@ -73,13 +73,12 @@ export default async function LocaleLayout({
                 </head>
                 <body 
                     className={`${ibmPlexThai.variable} ${notoThai.variable} ${inter.variable} ${sarabun.variable} ${mitr.variable} ${itim.variable} font-default antialiased`}
-                    style={{ fontFamily: 'var(--font-default)' }}
                 >
                     <IntlayerClientProvider locale={locale as any}>
                         <Providers>
                             <HeaderBar />
                             <main>{children}</main>
-                            <Footer brandName={BRAND_NAME} />
+                            <Footer siteName={BRAND_NAME} />
                         </Providers>
                     </IntlayerClientProvider>
                 </body>

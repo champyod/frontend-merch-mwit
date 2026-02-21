@@ -443,9 +443,11 @@ export const useAdminCollections = (enabled: boolean = true) => {
 
 // --- Collections ---
 
-const fetchCollections = async () => {
-	const res = await fetch(`${API_BASE_URL}/brand`);
-	const data = await res.json();
+const fetchCollections = async (): Promise<AdminCollection[]> => {
+	const res = await fetch(`${API_BASE_URL}/collections`);
+	if (!res.ok) throw new Error("Failed to fetch collections");
+	const data: ApiResponse<AdminCollection[]> = await res.json();
+	if (data.hasError) throw new Error(data.errorMessage || "Failed to fetch collections");
 	return data.payload || [];
 };
 

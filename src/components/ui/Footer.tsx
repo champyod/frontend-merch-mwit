@@ -8,7 +8,7 @@ import { Box, Container, Grid, Stack, Flex, Text, Heading } from "@/components/u
 import { Facebook, Instagram } from "lucide-react";
 import { buildLocalePath, normalizeLocale } from "@/lib/navigation";
 
-export default function Footer({ brandName }: { brandName: string }) {
+export default function Footer({ siteName }: { siteName: string }) {
   const t = useIntlayer("footer");
   const localeData = useLocale();
   const locale = normalizeLocale(localeData);
@@ -27,6 +27,8 @@ export default function Footer({ brandName }: { brandName: string }) {
                 href={BRAND_SOCIALS.facebook}
                 target="_blank"
                 rel="noreferrer"
+                aria-label="Facebook"
+                title="Facebook"
                 className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/70 hover:bg-[#58a076] hover:text-white transition-all"
               >
                 <Facebook size={20} />
@@ -35,6 +37,8 @@ export default function Footer({ brandName }: { brandName: string }) {
                 href={BRAND_SOCIALS.instagram}
                 target="_blank"
                 rel="noreferrer"
+                aria-label="Instagram"
+                title="Instagram"
                 className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/70 hover:bg-[#58a076] hover:text-white transition-all"
               >
                 <Instagram size={20} />
@@ -92,7 +96,7 @@ export default function Footer({ brandName }: { brandName: string }) {
         <Box className="pt-10 border-t border-white/5">
           <Flex direction="col" className="md:flex-row justify-between items-center gap-4">
             <Text size="xs" weight="bold" uppercase tracking="tight" color="text-white/30">
-              © {new Date().getFullYear()} {brandName}. {t.rights.value}
+              © {new Date().getFullYear()} {siteName}. {t.rights.value}
             </Text>
             <Text size="xs" weight="black" uppercase tracking="widest" color="text-white/20" className="text-[10px]">
               {t.designedBy.value}
