@@ -1,0 +1,17 @@
+# Agent Execution Policy (Persistent)
+
+This repository follows the global rules in ~/.gemini/GEMINI.md and ~/.gemini/CLEAN_CODE.md.
+
+Mandatory rules:
+1) All page UI must be rendered by components in src/components/**.
+2) Pages should not define local UI-heavy components or styling blocks.
+3) UI must use src/components/ui primitives/components and approved variants.
+4) Business logic must live in src/lib/**.
+5) API calls must live in src/hooks/**.
+6) Keep functions small, names meaningful, and avoid side-effect-heavy code.
+7) Keep structure vertically separated and dense by concept.
+
+When implementing:
+- Prefer component composition over inline page JSX.
+- Move API request code to hooks and pure logic utilities to lib.
+- Keep page files thin and orchestration-only.
