@@ -32,7 +32,7 @@ export function CollectionInput({ form }: Props) {
 				readOnly={true}
 				autoComplete="off"
 				placeholder="Loading..."
-				id="brand"
+				id="collection"
 				className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white"
 			/>
 		);
@@ -61,25 +61,25 @@ export function CollectionInput({ form }: Props) {
 			<input
 				autoComplete="off"
 				placeholder="Type to filter"
-				id="brand"
+				id="collection"
 				className="w-full bg-white/5 border-x border-t border-white/10 rounded-t-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#58a076]/50 transition-all outline-none"
-				{...register("brand", { required: true })}
+				{...register("collection", { required: true })}
 				onChange={(event) => {
 					setInputText(formatInput(event.target.value));
 					setSelectValue("");
 				}}
-				onBlur={() => setValue("brand", formatInput(inputText))}
+				onBlur={() => setValue("collection", formatInput(inputText))}
 			/>
 			<select
-				onChange={(event) => setValue("brand", event.target.value)}
-				id="brand"
+				onChange={(event) => setValue("collection", event.target.value)}
+				id="collection"
 				className="w-full bg-white/5 border-x border-b border-white/10 rounded-b-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#58a076]/50 appearance-none cursor-pointer outline-none mb-2"
 				value={selectValue}
 			>
 				<option value={""} disabled={true} className="bg-[#0a2735]">
 					{collectionArr.length !== 0
 						? `Suggestions (${collectionArr.length})`
-						: `${(inputText || watch("brand")).slice(
+						: `${(inputText || watch("collection")).slice(
 								0,
 								5
 						  )}... will be added after submit`}

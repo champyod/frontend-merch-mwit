@@ -85,6 +85,27 @@ export type Site = {
 	image_url?: string;
 };
 
+export type AdminOverview = {
+	total_orders: number;
+	total_revenue: number;
+	pending_preorders: number;
+	active_users: number;
+	visible_products: number;
+	visible_sets: number;
+	preorder_products: number;
+	preorder_sets: number;
+};
+
+export type AdminUser = {
+	uuid: string;
+	name: string;
+	email: string;
+	role: string;
+	created_at: string;
+	last_active_at?: string;
+	is_active: boolean;
+};
+
 // Cart types
 export type CartItem = {
 	item_id: number;

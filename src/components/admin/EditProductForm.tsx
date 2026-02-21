@@ -20,7 +20,7 @@ import { navigateWithLocale } from "@/lib/navigation";
 export interface IFormInputs {
 	title: string;
 	pageId: string;
-	brand: string;
+	collection: string;
 	price: number;
 	discount: number;
 	discount_type: "dollar" | "percent";
@@ -56,7 +56,7 @@ export function EditProductForm({ product }: { product: Item }) {
 
 	const form = useForm<IFormInputs>({
 		defaultValues: {
-			brand: product.name,
+			collection: product.name,
 			pageId: product.page_id.toString(),
 			title: product.title,
 			price: product.price,

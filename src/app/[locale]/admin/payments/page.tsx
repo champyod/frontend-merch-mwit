@@ -1,78 +1,41 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { LiquidCard } from "@/components/ui/LiquidCard";
 import { LiquidButton } from "@/components/ui/LiquidButton";
-import { CreditCard, Plus, Trash2, Loader2, AlertCircle, TrendingUp, ShoppingBag, DollarSign } from "lucide-react";
+import { CreditCard, Plus, Trash2, Loader2, AlertCircle, TrendingUp, ShoppingBag } from "lucide-react";
 import { Toaster, toast } from "sonner";
-import { API_BASE_URL } from "@/lib/env";
-
-interface PaymentAccount {
-  id: number;
-  name: string;
-  promptpay_id: string;
-  total_orders: number;
-  total_revenue: number;
-}
+import { useCreatePaymentAccount, useDisablePaymentAccount, usePaymentAccounts } from "@/hooks/useAdmin";
 
 export default function AdminPaymentsPage() {
-  const [accounts, setAccounts] = useState<PaymentAccount[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsCreating] = useState(false);
+  const { data: accounts = [], isLoading, refetch } = usePaymentAccounts();
+  const createMutation = useCreatePaymentAccount();
+  const disableMutation = useDisablePaymentAccount();
   
   const [name, setName] = useState("");
   const [ppId, setPpId] = useState("");
 
-  const fetchAccounts = async () => {
-    try {
-      const res = await fetch(`${API_BASE_URL}/admin/payment-accounts`, {
-        headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
-      });
-      const data = await res.json();
-      setAccounts(data || []);
-    } catch (e) {
-      toast.error("Failed to load accounts");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => { fetchAccounts(); }, []);
-
   const handleCreate = async () => {
     if (!name || !ppId) return toast.error("Please fill all fields");
-    setIsCreating(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/payment-accounts`, {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}` 
-        },
-        body: JSON.stringify({ name, promptpay_id: ppId })
-      });
-      if (res.ok) {
-        toast.success("Account added");
-        setName(""); setPpId("");
-        fetchAccounts();
-      }
+      await createMutation.mutateAsync({ name, promptpay_id: ppId });
+      toast.success("Account added");
+      setName("");
+      setPpId("");
     } catch (e) {
-      toast.error("Error creating account");
-    } finally {
-      setIsCreating(false);
+      toast.error(e instanceof Error ? e.message : "Error creating account");
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Are you sure?")) return;
+    if (!confirm("Disable this payment account?")) return;
     try {
-      await fetch(`${API_BASE_URL}/admin/payment-accounts/${id}`, {
-        method: "DELETE",
-        headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
-      });
-      fetchAccounts();
-      toast.success("Deleted");
-    } catch (e) { toast.error("Delete failed"); }
+      await disableMutation.mutateAsync(id);
+      toast.success("Disabled");
+      refetch();
+    } catch (e) {
+      toast.error("Disable failed");
+    }
   };
 
   return (
@@ -108,8 +71,8 @@ export default function AdminPaymentsPage() {
                 placeholder="08xxxxxxxx"
               />
             </div>
-            <LiquidButton className="w-full" onClick={handleCreate} disabled={isSubmitting}>
-              {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : "Create Account"}
+            <LiquidButton className="w-full" onClick={handleCreate} disabled={createMutation.isPending}>
+              {createMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : "Create Account"}
             </LiquidButton>
           </div>
         </LiquidCard>
@@ -134,9 +97,12 @@ export default function AdminPaymentsPage() {
                     <div>
                       <div className="font-bold text-white text-xl">{acc.name}</div>
                       <div className="text-sm text-emerald-500 font-mono tracking-wider">{acc.promptpay_id}</div>
+                      <div className={`text-xs mt-1 ${acc.is_active ? "text-emerald-400" : "text-slate-500"}`}>{acc.is_active ? "Active" : "Disabled"}</div>
                     </div>
                   </div>
                   <button 
+                    aria-label="Disable payment account"
+                    title="Disable payment account"
                     onClick={() => handleDelete(acc.id)}
                     className="p-2 text-slate-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
                   >
@@ -145,13 +111,13 @@ export default function AdminPaymentsPage() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-white/[0.03] rounded-2xl p-4 border border-white/5">
+                  <div className="bg-white/3 rounded-2xl p-4 border border-white/5">
                     <div className="flex items-center gap-2 text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">
                       <ShoppingBag className="w-3 h-3" /> Total Orders
                     </div>
                     <div className="text-2xl font-bold text-white">{acc.total_orders.toLocaleString()}</div>
                   </div>
-                  <div className="bg-emerald-500/[0.03] rounded-2xl p-4 border border-emerald-500/10">
+                  <div className="bg-emerald-500/3 rounded-2xl p-4 border border-emerald-500/10">
                     <div className="flex items-center gap-2 text-emerald-500/60 text-xs font-bold uppercase tracking-wider mb-1">
                       <TrendingUp className="w-3 h-3" /> Total Revenue
                     </div>

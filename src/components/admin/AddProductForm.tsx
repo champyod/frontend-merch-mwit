@@ -18,7 +18,7 @@ import { normalizeLocale } from "@/lib/navigation";
 export interface IFormInputs {
 	title: string;
 	pageId: string;
-	brand: string;
+	collection: string;
 	price: number;
 	discount: number;
 	discount_type: "dollar" | "percent";
@@ -44,7 +44,7 @@ export function AddProductForm() {
 	const form = useForm<IFormInputs>({
 		defaultValues: {
 			discount_type: "dollar",
-			brand: "",
+			collection: "",
 		},
 	});
 
