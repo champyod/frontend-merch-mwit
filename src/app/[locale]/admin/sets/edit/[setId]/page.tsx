@@ -16,7 +16,7 @@ export default function EditSetPage({ params }: { params: Promise<{ setId: strin
 	const { data: setDetail, isLoading } = useAdminSetDetail(setId, !!setId);
 
 	if (isLoading) return <Loader />;
-	if (!setDetail) return <Box className="p-6"><Text color="text-slate-300">Set not found.</Text></Box>;
+	if (!setDetail) return <Box><Text color="text-slate-300">Set not found.</Text></Box>;
 
 	return <SetForm mode="edit" initialSet={setDetail} locale={locale} />;
 }
