@@ -30,6 +30,17 @@ export default function DashboardPage() {
 	const [fromDate, setFromDate] = useState(defaultFrom);
 	const [toDate, setToDate] = useState(defaultTo);
 	const [appliedRange, setAppliedRange] = useState({ from: defaultFrom, to: defaultTo });
+
+	const applyPreset = (days: number) => {
+		const to = new Date();
+		const from = new Date();
+		from.setDate(from.getDate() - days);
+		const toIso = toISODate(to);
+		const fromIso = toISODate(from);
+		setFromDate(fromIso);
+		setToDate(toIso);
+		setAppliedRange({ from: fromIso, to: toIso });
+	};
 	const { user, isLoading } = useAuth();
 	const { data: overview } = useAdminOverview(
 		{
@@ -47,6 +58,11 @@ export default function DashboardPage() {
 									Hi <i>{user.name || user.role}</i>
 								</h1>			<h2 className="text-3xl font-bold">Admin Panel</h2>
 			<div className="mt-4 mb-4 bg-white/10 p-3 rounded-lg border border-white/10">
+				<div className="flex flex-wrap gap-2 mb-3">
+					<button type="button" onClick={() => applyPreset(7)} className="px-3 py-1.5 rounded-lg bg-white/10 text-white text-sm hover:bg-white/20">Last 7 days</button>
+					<button type="button" onClick={() => applyPreset(30)} className="px-3 py-1.5 rounded-lg bg-white/10 text-white text-sm hover:bg-white/20">Last 30 days</button>
+					<button type="button" onClick={() => applyPreset(90)} className="px-3 py-1.5 rounded-lg bg-white/10 text-white text-sm hover:bg-white/20">Last 90 days</button>
+				</div>
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
 					<div>
 						<label htmlFor="overview-from" className="text-xs text-white/60 uppercase">From</label>
