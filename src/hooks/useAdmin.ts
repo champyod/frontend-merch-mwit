@@ -51,6 +51,13 @@ export type AdminUser = {
 	is_active: boolean;
 };
 
+export type AdminUsersResponse = {
+	items: AdminUser[];
+	total: number;
+	page: number;
+	limit: number;
+};
+
 export type AdminSetItem = {
 	id?: number;
 	set_id?: number;
@@ -217,18 +224,44 @@ export const useAdminOverview = (enabled: boolean = true) => {
 	});
 };
 
-const fetchAdminUsers = async (): Promise<AdminUser[]> => {
-	const res = await fetch(`${API_BASE_URL}/admin/users`);
+const fetchAdminUsers = async (params?: {
+	search?: string;
+	status?: "all" | "active" | "inactive";
+	role?: "all" | "super-admin" | "customer";
+	sort?: "created_desc" | "created_asc" | "last_active_desc" | "last_active_asc";
+	page?: number;
+	limit?: number;
+}): Promise<AdminUsersResponse> => {
+	const query = new URLSearchParams();
+	if (params?.search?.trim()) query.set("search", params.search.trim());
+	if (params?.status && params.status !== "all") query.set("status", params.status);
+	if (params?.role && params.role !== "all") query.set("role", params.role);
+	if (params?.sort) query.set("sort", params.sort);
+	if (params?.page && params.page > 0) query.set("page", String(params.page));
+	if (params?.limit && params.limit > 0) query.set("limit", String(params.limit));
+
+	const queryString = query.toString();
+	const res = await fetch(`${API_BASE_URL}/admin/users${queryString ? `?${queryString}` : ""}`);
 	if (!res.ok) throw new Error("Failed to fetch users");
-	const data: ApiResponse<AdminUser[]> = await res.json();
+	const data: ApiResponse<AdminUsersResponse> = await res.json();
 	if (data.hasError) throw new Error(data.errorMessage || "Failed to fetch users");
-	return data.payload || [];
+	return data.payload || { items: [], total: 0, page: 1, limit: 20 };
 };
 
-export const useAdminUsers = (enabled: boolean = true) => {
+export const useAdminUsers = (
+	params?: {
+		search?: string;
+		status?: "all" | "active" | "inactive";
+		role?: "all" | "super-admin" | "customer";
+		sort?: "created_desc" | "created_asc" | "last_active_desc" | "last_active_asc";
+		page?: number;
+		limit?: number;
+	},
+	enabled: boolean = true,
+) => {
 	return useQuery({
-		queryKey: ["admin-users"],
-		queryFn: fetchAdminUsers,
+		queryKey: ["admin-users", params?.search || "", params?.status || "all", params?.role || "all", params?.sort || "created_desc", params?.page || 1, params?.limit || 20],
+		queryFn: () => fetchAdminUsers(params),
 		enabled,
 	});
 };
