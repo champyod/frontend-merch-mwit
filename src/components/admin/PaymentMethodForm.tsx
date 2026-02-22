@@ -112,10 +112,10 @@ export default function PaymentMethodForm({ initialData, onClose }: PaymentMetho
           control={form.control}
           name="is_active"
           render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border border-white/10 p-3 shadow-sm">
-                <Box className="space-y-0.5">
-                <FormLabel className="text-white">{t.active.value}</FormLabel>
-                <Text size="sm" color="text-white/70">
+              <FormItem className="flex flex-row items-start justify-between rounded-lg border border-white/10 p-3 shadow-sm">
+                <Box className="pr-4">
+                <FormLabel className="text-white block leading-tight">{t.active.value}</FormLabel>
+                <Text size="sm" color="text-white/70" className="block mt-1 leading-snug">
                   {t.paymentMethodActiveDescription.value}
                 </Text>
                 </Box>

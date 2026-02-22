@@ -18,11 +18,18 @@ type PaymentMethodPayload = {
 };
 
 // Fetch all payment methods
-export const usePaymentMethods = (activeOnly: boolean = false) => {
+export const usePaymentMethods = (activeOnly?: boolean) => {
+  const queryScope = activeOnly === undefined ? "all" : activeOnly ? "active" : "inactive";
+
   return useQuery<PaymentMethod[], Error>({
-    queryKey: ["paymentMethods", activeOnly],
+    queryKey: ["paymentMethods", queryScope],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/admin/payment-accounts?active=${activeOnly}`);
+      const endpoint =
+        activeOnly === undefined
+          ? `${API_BASE_URL}/admin/payment-accounts`
+          : `${API_BASE_URL}/admin/payment-accounts?active=${activeOnly}`;
+
+      const res = await fetch(endpoint);
       if (!res.ok) {
         throw new Error("Failed to fetch payment methods");
       }
