@@ -40,6 +40,10 @@ const getNavLinks = (locale: string): NavLinkType[] => [
 		text: "Sets",
 	},
 	{
+		href: `/${locale}/admin/payment-methods`,
+		text: "Payment Methods",
+	},
+	{
 		href: `/${locale}/admin/preorders`,
 		text: "Preorders",
 	},

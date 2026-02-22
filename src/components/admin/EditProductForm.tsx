@@ -7,15 +7,16 @@ import { ImagesUpload } from "./ImagesUpload";
 import { CollectionInput } from "./CollectionInput";
 import { ColorSizeInput } from "./ColorSizeInput";
 import { PageInput } from "./PageInput";
-import { Box, Card, Heading, Button, Stack, Grid, Text } from "@/components/ui/primitives";
+import { Box, Card, Heading, Button, Stack, Grid, Text, Checkbox } from "@/components/ui/primitives";
 import { Item } from "@/types/types";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, Trash2 } from "lucide-react";
 import { useIntlayer, useLocale } from "next-intlayer";
-import { usePaymentAccounts } from "@/hooks/useAdmin";
+import { usePaymentMethods } from "@/hooks/usePaymentMethods"; // Use our new hook
 import { API_BASE_URL } from "@/lib/env";
 import { navigateWithLocale } from "@/lib/navigation";
+import { SearchableSelect } from "@/components/ui/SearchableSelect"; // Import SearchableSelect
 
 export interface IFormInputs {
 	title: string;
@@ -33,7 +34,7 @@ export interface IFormInputs {
 		color: string;
 		sizes: { size: string; quantity: number }[];
 	}[];
-	payment_account_id: string;
+	payment_account_id: number; // Change type to number
 }
 
 const normalizeLocale = (value: unknown): "th" | "en" => {
@@ -52,7 +53,7 @@ export function EditProductForm({ product }: { product: Item }) {
 			? localeData
 			: (localeData as { locale?: string } | undefined)?.locale
 	);
-	const { data: paymentAccounts = [] } = usePaymentAccounts();
+	const { data: paymentMethods = [] } = usePaymentMethods(true); // Fetch only active payment methods
 
 	const form = useForm<IFormInputs>({
 		defaultValues: {
@@ -67,7 +68,7 @@ export function EditProductForm({ product }: { product: Item }) {
 			imageURLs: product.images?.map(({ url }) => url).join("\n\n"),
 			isPreorder: product.is_preorder !== 0,
 			hidden: product.hidden !== 0,
-			payment_account_id: product.payment_account_id?.toString() || "",
+			payment_account_id: product.payment_account_id || 0, // Set to 0 if null/undefined
 		},
 	});
 
@@ -80,7 +81,7 @@ export function EditProductForm({ product }: { product: Item }) {
 				price: Number(formData.price),
 				discount: Number(formData.discount || 0),
 				imageURLs: formData.imageURLs.split("\n\n").map((url) => url.trim()),
-				payment_account_id: parseInt(formData.payment_account_id),
+				payment_account_id: formData.payment_account_id, // Already a number
 				colorSizeArr: formData.colorSizeArr
 					.filter(({ color }) => color.trim().length !== 0)
 					.map((cs) => ({
@@ -158,7 +159,7 @@ export function EditProductForm({ product }: { product: Item }) {
 										<label className="text-sm font-medium text-slate-400">{t.priceThb.value}</label>
 										<input 
 											type="number" 
-											{...form.register("price", { required: true })} 
+											{...form.register("price", { required: true, valueAsNumber: true })} 
 											className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#58a076]/50 transition-all" 
 										/>
 									</Stack>
@@ -169,15 +170,14 @@ export function EditProductForm({ product }: { product: Item }) {
 								</Grid>
 								<Stack gap={2}>
 									<label className="text-sm font-medium text-slate-400">{t.paymentAccount.value}</label>
-									<select 
-										{...form.register("payment_account_id", { required: true })}
-										className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#58a076]/50 appearance-none cursor-pointer"
-									>
-										<option value="" className="bg-[#0a2735]">{t.selectAccount.value}</option>
-										{paymentAccounts.map((acc: { id: number; name: string }) => (
-											<option key={acc.id} value={acc.id} className="bg-[#0a2735]">{acc.name}</option>
-										))}
-									</select>
+									<SearchableSelect
+										options={paymentMethods.map(method => ({ value: method.id, label: method.name }))}
+										value={form.watch("payment_account_id")}
+										onValueChange={(value) => form.setValue("payment_account_id", value as number)}
+										placeholder={t.selectAccount.value}
+										noResultsText={t.noPaymentMethodFound.value} // Assuming this key exists
+										searchPlaceholder={t.searchPaymentMethods.value} // Assuming this key exists
+									/>
 								</Stack>
 							</Stack>
 						</Card>
@@ -188,14 +188,8 @@ export function EditProductForm({ product }: { product: Item }) {
 									{t.inventoryLogic.value}
 								</Heading>
 								<Box className="flex gap-6">
-									<label className="flex items-center gap-2 cursor-pointer group">
-										<input type="checkbox" {...form.register("isPreorder")} className="w-4 h-4 rounded border-white/10 bg-white/5 text-[#58a076] focus:ring-offset-0 focus:ring-0" />
-										<Text size="sm" color="text-white" className="group-hover:text-[#58a076] transition-colors">{t.preorderItem.value}</Text>
-									</label>
-									<label className="flex items-center gap-2 cursor-pointer group">
-										<input type="checkbox" {...form.register("hidden")} className="w-4 h-4 rounded border-white/10 bg-white/5 text-[#58a076] focus:ring-offset-0 focus:ring-0" />
-										<Text size="sm" color="text-white" className="group-hover:text-[#58a076] transition-colors">{t.hidden.value}</Text>
-									</label>
+									<Checkbox label={t.preorderItem.value} {...form.register("isPreorder")} />
+									<Checkbox label={t.hidden.value} {...form.register("hidden")} />
 								</Box>
 								<Stack gap={2}>
 									<label className="text-sm font-medium text-slate-400">{t.pageLocation.value}</label>

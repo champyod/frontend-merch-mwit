@@ -27,7 +27,7 @@ const fetchPages = async (): Promise<MenuItem[]> => {
 	const res = await fetch(`${API_BASE_URL}/page`);
 	const data: GetPagesResponse = await res.json();
 	if (data.hasError) throw new Error(data.errorMessage);
-	return data.payload;
+	return Array.isArray(data.payload) ? data.payload : [];
 };
 
 export const useSite = () => {

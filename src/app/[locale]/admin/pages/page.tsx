@@ -1,6 +1,6 @@
 "use client";
 
-import TextLoader from "@/components/ui/TextLoader";
+import Loader from "@/components/ui/Loader";
 import { useQuery } from "@tanstack/react-query";
 import { MenuOrderSort } from "./MenuOrderSort";
 import { MenuItem } from "@/types/types";
@@ -30,10 +30,11 @@ export default function Pages() {
 		},
 	});
 
-	const [menuItems, setMenuItems] = useState<MenuItem[] | null>(null);
+	const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
 	useEffect(
 		function initializeMenuItems() {
-			if (data) setMenuItems(data.payload);
+			if (data && Array.isArray(data.payload)) setMenuItems(data.payload);
+			else if (data) setMenuItems([]);
 		},
 		[data]
 	);
@@ -65,20 +66,20 @@ export default function Pages() {
 		[menuItems, isTriggeredSaveOrder]
 	);
 
-	if (!data || !menuItems)
+	if (!data)
 		return (
 			<>
 				<h1 className="text-3xl font-bold">Pages</h1>
-				<TextLoader loadingText="Loading" />
+				<Loader />
 			</>
 		);
 
 	const addPage = (newPage: MenuItem) =>
-		setMenuItems((prev) => (!prev ? prev : [...prev, newPage]));
+		setMenuItems((prev) => [...prev, newPage]);
 
 	const deletePage = (id: MenuItem["ID"]) =>
 		setMenuItems((prev) =>
-			!prev ? prev : prev.filter((item) => item.ID !== id)
+			prev.filter((item) => item.ID !== id)
 		);
 
 	const handleDragEnd = (event: DragEndEvent) => {
@@ -86,8 +87,6 @@ export default function Pages() {
 		if (!active || !over) return;
 		if (active.id !== over.id) {
 			setMenuItems((items) => {
-				if (!items) return null;
-
 				const oldIndex = items.findIndex(
 					(item) => item.slug === active.id
 				);

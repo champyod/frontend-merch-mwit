@@ -1,5 +1,6 @@
 "use client";
 
+import Loader from "@/components/ui/Loader";
 import TextLoader from "@/components/ui/TextLoader";
 import { Site } from "@/types/types";
 import { useQuery } from "@tanstack/react-query";
@@ -28,7 +29,7 @@ export default function SettingsPage() {
 		return (
 			<>
 				<h1 className="text-3xl font-bold">Settings</h1>
-				<TextLoader loadingText="Loading" />
+				<Loader />
 			</>
 		);
 

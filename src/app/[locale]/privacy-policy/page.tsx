@@ -1,5 +1,7 @@
 import { Metadata } from "next";
 import { BRAND_EMAIL, BRAND_NAME } from "@/config";
+import PolicyLayout from "@/components/ui/PolicyLayout";
+import { Box } from "@/components/ui/primitives";
 
 export const metadata: Metadata = {
 	title: `Privacy Policy | ${BRAND_NAME}`,
@@ -7,9 +9,8 @@ export const metadata: Metadata = {
 
 export default function PrivacyPolicy() {
 	return (
-		<div className="bg-background">
-			<section className="px-10 pt-[15vh] min-h-[90vh] pb-20">
-				<h1 className="pb-8 text-5xl font-bold">Privacy Policy</h1>
+		<PolicyLayout title="Privacy Policy">
+			<Box>
 				<strong>OVERVIEW</strong> <br /> This website is operated by
 				{BRAND_NAME}. Throughout the site, the terms “we”, “us” and
 				“our” refer to {BRAND_NAME}. {BRAND_NAME} offers this website,
@@ -165,7 +166,7 @@ export default function PrivacyPolicy() {
 				for any harm or damages related to the purchase or use of goods,
 				Services, resources, content, or any other transactions made in
 				connection with any third-party websites. Please review
-				carefully the third-{"party's"} policies and practices and make
+				carefully the third-party's policies and practices and make
 				sure you understand them before you engage in any transaction.
 				Complaints, claims, concerns, or questions regarding third-party
 				products should be directed to the third-party. <br /> <br />{" "}
@@ -353,7 +354,7 @@ export default function PrivacyPolicy() {
 				>
 					{BRAND_EMAIL}
 				</a>
-			</section>
-		</div>
+			</Box>
+		</PolicyLayout>
 	);
 }

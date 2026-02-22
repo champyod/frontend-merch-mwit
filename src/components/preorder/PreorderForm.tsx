@@ -113,7 +113,7 @@ export default function PreorderForm() {
   };
 
   return (
-    <div className="w-full">
+    <Box className="w-full">
       <FormProvider {...methods}>
         <AnimatePresence mode="wait">
           {step === 'info' && (
@@ -141,6 +141,6 @@ export default function PreorderForm() {
           )}
         </AnimatePresence>
       </FormProvider>
-    </div>
+    </Box>
   );
 }

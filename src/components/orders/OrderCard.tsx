@@ -41,15 +41,15 @@ export const OrderCard = ({ order }: OrderCardProps) => {
             <OrderStatusStepper currentStatus={order.status} />
           </Stack>
 
-          <Flex className="flex-row md:flex-col w-full md:w-auto pt-6 md:pt-0 border-t md:border-t-0 border-white/5" justifyContent="between" alignItems="end" gap={4}>
-            <div className="text-right">
+            <Flex className="flex-row md:flex-col w-full md:w-auto pt-6 md:pt-0 border-t md:border-t-0 border-white/5" justifyContent="between" alignItems="end" gap={4}>
+              <Box className="text-right">
               <Text size="xs" weight="bold" color="text-white/40" uppercase tracking="widest" className="mb-1 block">
                 {t.totalAmountLabel.value}
               </Text>
               <Text size="2xl" weight="black" color="text-white">
                 {t.currency.value}{order.total_price.toLocaleString()}
               </Text>
-            </div>
+              </Box>
             <Box className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/20 group-hover:text-[#58a076] group-hover:bg-[#58a076]/10 transition-all">
               <ChevronRight className="w-6 h-6" />
             </Box>

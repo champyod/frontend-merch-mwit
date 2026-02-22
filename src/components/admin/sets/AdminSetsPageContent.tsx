@@ -16,6 +16,7 @@ export default function AdminSetsPageContent() {
 
 	const [search, setSearch] = useState("");
 	const [status, setStatus] = useState<AdminSetStatusFilter>("");
+	const statusSelectValue = status || "__all__";
 	const { data: sets = [], isLoading } = useAdminSets(search, status);
 	const disableSetMutation = useDisableSet();
 	const restoreSetMutation = useRestoreSet();
@@ -62,12 +63,15 @@ export default function AdminSetsPageContent() {
 
 				<Stack gap={2}>
 					<Text size="sm" weight="medium" color="text-slate-400">Status</Text>
-					<Select value={status} onValueChange={(value: AdminSetStatusFilter) => setStatus(value)}>
+					<Select
+						value={statusSelectValue}
+						onValueChange={(value) => setStatus(value === "__all__" ? "" : (value as AdminSetStatusFilter))}
+					>
 						<SelectTrigger className="w-full bg-white/5 border-white/10 text-white">
 							<SelectValue placeholder="All status" />
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="">All status</SelectItem>
+							<SelectItem value="__all__">All status</SelectItem>
 							<SelectItem value="shown">Shown</SelectItem>
 							<SelectItem value="hidden">Hidden</SelectItem>
 							<SelectItem value="enabled">Enabled</SelectItem>

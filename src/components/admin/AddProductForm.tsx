@@ -7,7 +7,7 @@ import { ImagesUpload } from "./ImagesUpload";
 import { CollectionInput } from "./CollectionInput";
 import { ColorSizeInput } from "./ColorSizeInput";
 import { PageInput } from "./PageInput";
-import { Box, Card, Heading, Button, Stack, Grid, Text } from "@/components/ui/primitives";
+import { Box, Card, Heading, Button, Stack, Grid, SelectField, Checkbox } from "@/components/ui/primitives";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { useIntlayer, useLocale } from "next-intlayer";
@@ -17,7 +17,7 @@ import { normalizeLocale } from "@/lib/navigation";
 
 export interface IFormInputs {
 	title: string;
-	pageId: string;
+	pageId: string; // Optional - can be empty
 	collection: string;
 	price: number;
 	discount: number;
@@ -31,7 +31,7 @@ export interface IFormInputs {
 		color: string;
 		sizes: { size: string; quantity: number }[];
 	}[];
-	payment_account_id: string;
+	payment_account_id: number;
 }
 
 export function AddProductForm() {
@@ -45,19 +45,21 @@ export function AddProductForm() {
 		defaultValues: {
 			discount_type: "dollar",
 			collection: "",
+			payment_account_id: 0, // Default to 0 or null for new product
 		},
 	});
 
 	const onSubmit: SubmitHandler<IFormInputs> = async (formData) => {
 		try {
 			setIsLoading(true);
+			const pageId = formData.pageId ? parseInt(formData.pageId) : null;
 			const body = {
 				...formData,
-				pageId: parseInt(formData.pageId),
+				pageId: pageId,
 				price: Number(formData.price),
 				discount: Number(formData.discount || 0),
 				imageURLs: formData.imageURLs.split("\n\n").map((url) => url.trim()),
-				payment_account_id: parseInt(formData.payment_account_id),
+				payment_account_id: formData.payment_account_id, // Already a number
 				colorSizeArr: formData.colorSizeArr
 					.filter(({ color }) => color.trim().length !== 0)
 					.map((cs) => ({
@@ -118,7 +120,7 @@ export function AddProductForm() {
 										<label className="text-sm font-medium text-slate-400">{t.priceThb.value}</label>
 										<input 
 											type="number" 
-											{...form.register("price", { required: true })} 
+											{...form.register("price", { required: true, valueAsNumber: true })} 
 											className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#58a076]/50 transition-all" 
 										/>
 									</Stack>
@@ -127,18 +129,15 @@ export function AddProductForm() {
 										<CollectionInput form={form} />
 									</Stack>
 								</Grid>
-								<Stack gap={2}>
-									<label className="text-sm font-medium text-slate-400">{t.paymentAccount.value}</label>
-									<select 
-										{...form.register("payment_account_id", { required: true })}
-										className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#58a076]/50 appearance-none cursor-pointer"
-									>
-										<option value="" className="bg-[#0a2735]">{t.selectAccount.value}</option>
-										{paymentAccounts.map((acc: { id: number; name: string }) => (
-											<option key={acc.id} value={acc.id} className="bg-[#0a2735]">{acc.name}</option>
-										))}
-									</select>
-								</Stack>
+								<SelectField
+									label={t.paymentAccount.value}
+									{...form.register("payment_account_id", { required: true })}
+								>
+									<option value="" className="bg-[#0a2735]">{t.selectAccount.value}</option>
+									{paymentAccounts.map((acc: { id: number; name: string }) => (
+										<option key={acc.id} value={acc.id} className="bg-[#0a2735]">{acc.name}</option>
+									))}
+								</SelectField>
 							</Stack>
 						</Card>
 
@@ -148,14 +147,8 @@ export function AddProductForm() {
 									{t.inventoryLogic.value}
 								</Heading>
 								<Box className="flex gap-6">
-									<label className="flex items-center gap-2 cursor-pointer group">
-										<input type="checkbox" {...form.register("isPreorder")} className="w-4 h-4 rounded border-white/10 bg-white/5 text-[#58a076] focus:ring-offset-0 focus:ring-0" />
-										<Text size="sm" color="text-white" className="group-hover:text-[#58a076] transition-colors">{t.preorderItem.value}</Text>
-									</label>
-									<label className="flex items-center gap-2 cursor-pointer group">
-										<input type="checkbox" {...form.register("hidden")} className="w-4 h-4 rounded border-white/10 bg-white/5 text-[#58a076] focus:ring-offset-0 focus:ring-0" />
-										<Text size="sm" color="text-white" className="group-hover:text-[#58a076] transition-colors">{t.hidden.value}</Text>
-									</label>
+									<Checkbox label={t.preorderItem.value} {...form.register("isPreorder")} />
+									<Checkbox label={t.hidden.value} {...form.register("hidden")} />
 								</Box>
 								<Stack gap={2}>
 									<label className="text-sm font-medium text-slate-400">{t.pageLocation.value}</label>

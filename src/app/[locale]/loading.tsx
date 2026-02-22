@@ -1,9 +1,7 @@
-import Loader from "@/components/ui/Loader";
+import LoadingOverlay from "@/components/ui/LoadingOverlay";
 
 export default function Loading() {
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0a2735]">
-            <Loader />
-        </div>
+        <LoadingOverlay fullScreen label="Loading..." />
     );
 }

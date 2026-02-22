@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { IFormInputs } from "./AddProductForm";
 import { SIZES } from "@/types/types";
+import { Box, Button, Card, Grid, Input, Stack, Text } from "@/components/ui/primitives";
 
 interface Props {
 	defaultColorSizeArr?: {
@@ -56,107 +57,101 @@ export function ColorSizeInput({ form, defaultColorSizeArr }: Props) {
 		value: string
 	) => {
 		const newColors = [...colors];
-		newColors[colorIndex].sizes[sizeIndex].quantity = parseInt(value);
+		newColors[colorIndex].sizes[sizeIndex].quantity = Number(value) || 0;
 		setColors(newColors);
 	};
 
 	return (
-		<>
+		<Stack gap={4}>
 			{colors.map((color, colorIndex) => (
-				<>
-					<div
-						className="border-2 border-black flex items-center mb-3 rounded-lg p-2 bg-slate-50"
-						key={colorIndex}
-					>
-						<label className="font-bold mr-3">
-							Color:{" "}
-							<small>(leave blank to not add this color)</small>
-						</label>
-						<input
-							className="w-full outline-none bg-transparent border-b-2 border-black"
-							type="text"
-							placeholder="Color"
-							value={color.color}
-							onChange={(e) =>
-								handleColorChange(colorIndex, e.target.value)
-							}
-						/>
-					</div>
+				<Card key={`color-${colorIndex}`} variant="outline" className="p-4 rounded-xl">
+					<Stack gap={3}>
+						<Box>
+							<Text size="sm" weight="bold" color="text-white" className="mb-1 block">
+								Color
+							</Text>
+							<Text size="xs" color="text-slate-500" className="mb-2 block">
+								Leave blank to skip this color
+							</Text>
+							<Input
+								id={`color-${colorIndex}`}
+								type="text"
+								placeholder="Color"
+								value={color.color}
+								onChange={(event) => handleColorChange(colorIndex, event.target.value)}
+							/>
+						</Box>
 
-					{color.sizes.map((size, sizeIndex) => (
-						<>
-							<div
-								className="p-5 flex flex-wrap items-center border-x-2 border-b-2 border-black rounded-b-lg my-3 bg-slate-50"
-								key={sizeIndex}
-							>
-								<div className="w-full">
-									<label className="block font-bold my-2">
-										Size:
-									</label>
-									<select
-										title="Select size"
-										className="border-b-2 border-black w-full outline-none bg-transparent"
-										value={size.size}
-										onChange={(e) =>
-											handleSizeChange(
-												colorIndex,
-												sizeIndex,
-												e.target.value
-											)
-										}
-									>
-										<option value={""}>
-											Select a size, or leave blank
-										</option>
-										{SIZES.map((size) => (
-											<option value={size} key={size}>
-												Size: {size}
-											</option>
-										))}
-									</select>
-								</div>
+						{color.sizes.map((size, sizeIndex) => (
+							<Card key={`color-${colorIndex}-size-${sizeIndex}`} variant="glass" className="p-3 rounded-xl">
+								<Grid cols={1} gap={3} className="md:grid-cols-2">
+									<Box>
+										<Box className="flex items-baseline justify-between mb-2">
+											<Text size="sm" weight="bold" color="text-white">
+												Size
+											</Text>
+											<Text size="xs" color="text-slate-500">
+												Optional
+											</Text>
+										</Box>
+										<select
+											title="Select size"
+											className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#58a076]/50"
+											value={size.size}
+											onChange={(event) =>
+												handleSizeChange(colorIndex, sizeIndex, event.target.value)
+											}
+										>
+											<option value={""} className="bg-[#0a2735]">Select a size (optional)</option>
+											{SIZES.map((sizeValue) => (
+												<option value={sizeValue} key={sizeValue} className="bg-[#0a2735]">
+													Size: {sizeValue}
+												</option>
+											))}
+										</select>
+									</Box>
 
-								<div className="w-full mt-3">
-									<label className="font-bold my-2 block">
-										Quantity:{" "}
-										<small>
-											(set to 0 to not add this size)
-										</small>
-									</label>
-									<input
-										className="border-b-2 border-black w-full outline-none bg-transparent"
-										type="number"
-										placeholder="Quantity"
-										value={size.quantity}
-										onChange={(e) =>
-											handleInventoryChange(
-												colorIndex,
-												sizeIndex,
-												e.target.value
-											)
-										}
-									/>
-								</div>
-							</div>
-						</>
-					))}
-					<button
-						type="button"
-						className="my-3 block border-2 border-black hover:bg-slate-50 rounded-lg p-2 font-bold w-28.75"
-						onClick={() => addSize(colorIndex)}
-					>
-						Add Size +
-					</button>
-				</>
+									<Box>
+										<Box className="flex items-baseline justify-between mb-2">
+											<Text size="sm" weight="bold" color="text-white">
+												Quantity
+											</Text>
+											<Text size="xs" color="text-slate-500">
+												Set 0 to skip
+											</Text>
+										</Box>
+										<Input
+											id={`quantity-${colorIndex}-${sizeIndex}`}
+											type="number"
+											placeholder="Quantity"
+											value={size.quantity}
+											onChange={(event) => handleInventoryChange(colorIndex, sizeIndex, event.target.value)}
+										/>
+									</Box>
+								</Grid>
+							</Card>
+						))}
+
+						<Button
+							type="button"
+							variant="secondary"
+							size="sm"
+							onClick={() => addSize(colorIndex)}
+						>
+							Add Size +
+						</Button>
+					</Stack>
+				</Card>
 			))}
 
-			<button
+			<Button
 				type="button"
-				className="block border-2 border-black hover:bg-slate-50 rounded-lg p-2 font-bold w-28.75"
+				variant="secondary"
+				size="sm"
 				onClick={addColor}
 			>
 				Add Color +
-			</button>
-		</>
+			</Button>
+		</Stack>
 	);
 }

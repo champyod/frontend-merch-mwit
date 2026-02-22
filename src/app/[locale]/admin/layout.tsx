@@ -11,7 +11,7 @@ import { navigateWithLocale } from "@/lib/navigation";
 
 import { Box } from "@/components/ui/primitives";
 
-import AppHeaderBar from "@/components/ui/AppHeaderBar";
+import HeaderBar from "@/components/ui/HeaderBar";
 
 const queryClient = new QueryClient();
 
@@ -45,7 +45,7 @@ export default function AdminRootLayout({
 
 	return (
 		<QueryClientProvider client={queryClient}>
-			<AppHeaderBar />
+			<HeaderBar />
 			<Box className="min-h-screen bg-[#0a2735] px-4 md:px-10 pb-10 pt-32">
 				<Toaster richColors closeButton />
 				{children}

@@ -66,6 +66,42 @@ const adminContent: DeclarationContent = {
 			en: "Collection*",
 			th: "คอลเลกชัน*",
 		}),
+		search: t({
+			en: "Search",
+			th: "ค้นหา",
+		}),
+		searchProductPlaceholder: t({
+			en: "Search by product title or collection",
+			th: "ค้นหาด้วยชื่อสินค้าหรือคอลเลกชัน",
+		}),
+		filterByCollection: t({
+			en: "Filter by collection",
+			th: "กรองตามคอลเลกชัน",
+		}),
+		allCollections: t({
+			en: "All Collections",
+			th: "ทุกคอลเลกชัน",
+		}),
+		sortBy: t({
+			en: "Sort by",
+			th: "เรียงตาม",
+		}),
+		latestUpdated: t({
+			en: "Latest updated",
+			th: "อัปเดตล่าสุด",
+		}),
+		titleAZ: t({
+			en: "Title A-Z",
+			th: "ชื่อ A-Z",
+		}),
+		priceLowHigh: t({
+			en: "Price low-high",
+			th: "ราคาน้อย-มาก",
+		}),
+		priceHighLow: t({
+			en: "Price high-low",
+			th: "ราคามาก-น้อย",
+		}),
 		paymentAccount: t({
 			en: "Linking Payment Account*",
 			th: "บัญชีรับชำระเงิน*",
@@ -121,6 +157,76 @@ const adminContent: DeclarationContent = {
 		deleteConfirm: t({
 			en: "Are you sure you want to delete this product?",
 			th: "คุณแน่ใจหรือไม่ว่าต้องการลบสินค้านี้?",
+		}),
+
+		// Payment Methods
+		paymentMethods: t({
+			en: "Payment Methods",
+			th: "วิธีการชำระเงิน",
+		}),
+		addNewPaymentMethod: t({
+			en: "Add New Payment Method",
+			th: "เพิ่มวิธีชำระเงินใหม่",
+		}),
+		editPaymentMethod: t({
+			en: "Edit Payment Method",
+			th: "แก้ไขวิธีชำระเงิน",
+		}),
+		name: t({
+			en: "Name",
+			th: "ชื่อ",
+		}),
+		promptPayId: t({
+			en: "PromptPay ID",
+			th: "รหัสพร้อมเพย์",
+		}),
+		active: t({
+			en: "Active",
+			th: "ใช้งาน",
+		}),
+		inactive: t({
+			en: "Inactive",
+			th: "ไม่ใช้งาน",
+		}),
+		actions: t({
+			en: "Actions",
+			th: "การจัดการ",
+		}),
+		edit: t({
+			en: "Edit",
+			th: "แก้ไข",
+		}),
+		disable: t({
+			en: "Disable",
+			th: "ปิดการใช้งาน",
+		}),
+		enable: t({
+			en: "Enable",
+			th: "เปิดใช้งาน",
+		}),
+		cancel: t({
+			en: "Cancel",
+			th: "ยกเลิก",
+		}),
+		create: t({
+			en: "Create",
+			th: "สร้าง",
+		}),
+		errorMessage: t({
+			en: "Error",
+			th: "ข้อผิดพลาด",
+		}),
+		paymentMethodNamePlaceholder: t({
+			en: "e.g. Student Council",
+			th: "เช่น สภานักเรียน",
+		}),
+		promptPayIdPlaceholder: t({
+			en: "e.g. 08xxxxxxxx",
+			th: "เช่น 08xxxxxxxx",
+		}),
+		paymentMethodActiveDescription: t({
+			en: "Enable this payment method for checkout",
+			th: "เปิดใช้งานวิธีชำระเงินนี้สำหรับการสั่งซื้อ",
 		})
 	},
 };

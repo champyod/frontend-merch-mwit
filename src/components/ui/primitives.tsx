@@ -1,6 +1,7 @@
 "use client";
 
 import React, { forwardRef } from "react";
+import Link from "next/link";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { Loader2 } from "lucide-react";
@@ -241,6 +242,30 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   isLoading?: boolean;
 }
 
+type ButtonVariant = Required<ButtonProps>["variant"];
+type ButtonSize = Required<ButtonProps>["size"];
+
+const buttonBaseStyles = "inline-flex items-center justify-center rounded-xl font-bold transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none";
+
+const buttonVariants: Record<ButtonVariant, string> = {
+  primary: "bg-gradient-to-r from-[#217c6b] to-[#58a076] text-white hover:shadow-[0_0_20px_rgba(88,160,118,0.4)] hover:scale-[1.02]",
+  liquid: "relative overflow-hidden bg-[#217c6b] text-white hover:bg-[#58a076] shadow-[0_0_15px_rgba(33,124,107,0.5)]",
+  secondary: "bg-white/10 text-white hover:bg-white/20",
+  outline: "border-2 border-white/10 bg-transparent text-white hover:bg-white/5",
+  ghost: "bg-transparent text-slate-400 hover:text-white hover:bg-white/5",
+  danger: "bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20",
+};
+
+const buttonSizes: Record<ButtonSize, string> = {
+  sm: "text-xs px-3 py-1.5 gap-1.5",
+  md: "text-sm px-6 py-2.5 gap-2",
+  lg: "text-base px-8 py-3.5 gap-3",
+  icon: "h-10 w-10 p-2",
+};
+
+const getButtonClasses = (variant: ButtonVariant, size: ButtonSize, className?: string) =>
+  cn(buttonBaseStyles, buttonVariants[variant], buttonSizes[size], className);
+
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(({ 
   children, 
   className, 
@@ -250,28 +275,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
   disabled,
   ...props 
 }, ref) => {
-  const baseStyles = "inline-flex items-center justify-center rounded-xl font-bold transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none";
-  
-  const variants = {
-    primary: "bg-gradient-to-r from-[#217c6b] to-[#58a076] text-white hover:shadow-[0_0_20px_rgba(88,160,118,0.4)] hover:scale-[1.02]",
-    liquid: "relative overflow-hidden bg-[#217c6b] text-white hover:bg-[#58a076] shadow-[0_0_15px_rgba(33,124,107,0.5)]", // Simplified liquid for standardization
-    secondary: "bg-white/10 text-white hover:bg-white/20",
-    outline: "border-2 border-white/10 bg-transparent text-white hover:bg-white/5",
-    ghost: "bg-transparent text-slate-400 hover:text-white hover:bg-white/5",
-    danger: "bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20",
-  };
-  
-  const sizes = {
-    sm: "text-xs px-3 py-1.5 gap-1.5",
-    md: "text-sm px-6 py-2.5 gap-2",
-    lg: "text-base px-8 py-3.5 gap-3",
-    icon: "h-10 w-10 p-2",
-  };
-
   return (
     <button 
       ref={ref}
-      className={cn(baseStyles, variants[variant], sizes[size], className)}
+      className={getButtonClasses(variant, size, className)}
       disabled={isLoading || disabled}
       {...props}
     >
@@ -281,6 +288,20 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
   );
 });
 Button.displayName = "Button";
+
+interface LinkButtonProps {
+  href: string;
+  children: React.ReactNode;
+  className?: string;
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+}
+
+export const LinkButton = ({ href, children, className, variant = "primary", size = "md" }: LinkButtonProps) => (
+  <Link href={href} className={getButtonClasses(variant, size, className)}>
+    {children}
+  </Link>
+);
 
 // --- Input Primitives ---
 
@@ -314,7 +335,7 @@ export const TextArea = forwardRef<HTMLTextAreaElement, React.TextareaHTMLAttrib
       id={id}
       ref={ref}
       className={cn(
-        "w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#58a076]/50 transition-all placeholder:text-slate-600 min-h-[100px]",
+        "w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#58a076]/50 transition-all placeholder:text-slate-600 min-h-25",
         error && "border-red-500 focus:ring-red-500/50",
         className
       )}
@@ -324,6 +345,60 @@ export const TextArea = forwardRef<HTMLTextAreaElement, React.TextareaHTMLAttrib
   </Stack>
 ));
 TextArea.displayName = "TextArea";
+
+interface SelectFieldProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
+  label?: string;
+  error?: string;
+}
+
+export const SelectField = forwardRef<HTMLSelectElement, SelectFieldProps>(({ className, label, error, id, children, ...props }, ref) => (
+  <Stack gap={2} className="w-full">
+    {label && <label htmlFor={id} className="text-sm font-medium text-slate-400">{label}</label>}
+    <select
+      id={id}
+      ref={ref}
+      className={cn(
+        "w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#58a076]/50 transition-all placeholder:text-slate-600 appearance-none cursor-pointer",
+        error && "border-red-500 focus:ring-red-500/50",
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </select>
+    {error && <Text size="xs" color="text-red-500">{error}</Text>}
+  </Stack>
+));
+SelectField.displayName = "SelectField";
+
+interface CheckboxProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label?: string;
+}
+
+export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(({ className, label, ...props }, ref) => (
+  <label className="flex items-center gap-2 cursor-pointer group">
+    <input
+      ref={ref}
+      type="checkbox"
+      className={cn(
+        "w-4 h-4 rounded border-white/10 bg-white/5 text-[#58a076] focus:ring-offset-0 focus:ring-0",
+        className
+      )}
+      {...props}
+    />
+    {label && (
+      <Text size="sm" color="text-white" className="group-hover:text-[#58a076] transition-colors">
+        {label}
+      </Text>
+    )}
+  </label>
+));
+Checkbox.displayName = "Checkbox";
+
+export const Spinner = ({ size = "md", className }: { size?: "sm" | "md" | "lg"; className?: string }) => {
+  const sizeMap = { sm: "h-4 w-4", md: "h-6 w-6", lg: "h-8 w-8" };
+  return <Loader2 className={cn("animate-spin text-emerald-500", sizeMap[size], className)} />;
+};
 
 // --- Display Primitives ---
 

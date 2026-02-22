@@ -4,6 +4,7 @@ import { MenuItem } from "@/types/types";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { API_BASE_URL } from "@/lib/env";
+import { Button, Card, Stack, Text } from "@/components/ui/primitives";
 
 interface IFormInputs {
 	slug: string;
@@ -59,66 +60,83 @@ export function EditPage({
 	return (
 		<>
 			<div
-				className="bg-primary z-10 opacity-50 fixed w-screen h-screen top-0 left-0 right-0"
+				className="fixed inset-0 z-10 bg-black/40 backdrop-blur-sm"
 				onClick={toggleEditPage}
 			/>
 
-			<div className="max-w-[400px] absolute mx-auto z-20 left-0 right-0 cursor-default">
-				<form
-					className="border-2 border-black rounded-lg bg-white p-5"
-					onSubmit={handleSubmit(onSubmit)}
-				>
-					<h1 className="pb-8 text-3xl font-bold">Edit Page</h1>
-
-					<label className="font-bold block pb-1">Text*</label>
-					<input
-						autoComplete="off"
-						placeholder="Text"
-						className="border-2 border-black rounded-lg p-2 outline-none w-full"
-						{...register("text", { required: true })}
-					/>
-					{errors.text && (
-						<p className="text-red-500 italic font-bold">
-							Text is required
-						</p>
-					)}
-
-					<label className="font-bold block pt-5 pb-">Slug*</label>
-					<p className="text-slate-600 text-sm pb-2">
-						The path of the URL. Eg:{" "}
-						{!watch("slug") ? "/<slug>" : `/${watch("slug")}`}
-					</p>
-					<input
-						autoComplete="off"
-						placeholder="Slug"
-						className="border-2 border-black rounded-lg p-2 outline-none w-full"
-						{...register("slug", { required: true })}
-						onBlur={() =>
-							setValue("slug", formatInput(watch("slug")))
-						}
-					/>
-					{errors.slug && (
-						<p className="text-red-500 italic font-bold">
-							Slug is required
-						</p>
-					)}
-
-					<div className="flex flex-wrap justify-end">
-						<button
-							type="button"
-							className="bg-slate-200 rounded-lg p-2 font-bold mt-5 mr-3 w-[80px]"
-							onClick={toggleEditPage}
+			<div className="fixed inset-0 z-20 flex items-center justify-center pointer-events-none">
+				<Card className="max-w-[400px] w-full mx-4 p-6 pointer-events-auto">
+					<form onSubmit={handleSubmit(onSubmit)}>
+						<Text
+							size="2xl"
+							weight="bold"
+							color="text-white"
+							className="block pb-8"
 						>
-							Cancel
-						</button>
-						<button
-							type="submit"
-							className="bg-primary text-white rounded-lg p-2 font-bold mt-5 w-[80px]"
-						>
-							Save
-						</button>
-					</div>
-				</form>
+							Edit Page
+						</Text>
+
+						<Stack gap={4} className="mb-6">
+							<div>
+								<label className="text-sm font-medium text-white block pb-2">
+									Text*
+								</label>
+								<input
+									autoComplete="off"
+									placeholder="Page title"
+									className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#58a076]/50 transition-all placeholder:text-slate-600"
+									{...register("text", { required: true })}
+								/>
+								{errors.text && (
+									<Text size="xs" color="text-red-500" className="pt-1">
+										Text is required
+									</Text>
+								)}
+							</div>
+
+							<div>
+								<label className="text-sm font-medium text-white block pb-2">
+									Slug*
+								</label>
+								<Text size="xs" color="text-slate-400" className="pb-2">
+									The path of the URL. Eg: {!watch("slug") ? "/<slug>" : `/${watch("slug")}`}
+								</Text>
+								<input
+									autoComplete="off"
+									placeholder="slug"
+									className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#58a076]/50 transition-all placeholder:text-slate-600"
+									{...register("slug", { required: true })}
+									onBlur={() =>
+										setValue("slug", formatInput(watch("slug")))
+									}
+								/>
+								{errors.slug && (
+									<Text size="xs" color="text-red-500" className="pt-1">
+										Slug is required
+									</Text>
+								)}
+							</div>
+						</Stack>
+
+						<div className="flex gap-3 justify-end">
+							<Button
+								type="button"
+								variant="ghost"
+								size="md"
+								onClick={toggleEditPage}
+							>
+								Cancel
+							</Button>
+							<Button
+								type="submit"
+								variant="primary"
+								size="md"
+							>
+								Save
+							</Button>
+						</div>
+					</form>
+				</Card>
 			</div>
 		</>
 	);

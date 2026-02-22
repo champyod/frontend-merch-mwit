@@ -131,6 +131,7 @@ export default function HeaderBar() {
 	const { user, isLoading, login } = useAuth();
 	const t = useIntlayer("header");
 	const { data: navLinks = [] } = usePages();
+	const safeNavLinks = Array.isArray(navLinks) ? navLinks : [];
 	const localeData = useLocale();
 	const locale = normalizeLocale(localeData);
 
@@ -179,15 +180,15 @@ export default function HeaderBar() {
 							);
 						})}
 						{user?.role === "super-admin" && <AdminDropdown />}
-						{navLinks && navLinks.slice(0, 5).map((item, index) => (
+						{safeNavLinks.slice(0, 5).map((item, index) => (
 							<NavLink
 								key={index}
 								href={`/${item.slug}`}
 								text={item.text}
 							/>
 						))}
-						{navLinks && navLinks.length > 5 && (
-							<OthersDropdown navLinks={navLinks.slice(5)} />
+						{safeNavLinks.length > 5 && (
+							<OthersDropdown navLinks={safeNavLinks.slice(5)} />
 						)}
 					</Flex>
 				</Box>
@@ -241,8 +242,10 @@ function AdminDropdown() {
 
 	const adminLinks = [
 		          { href: "/admin", text: "Dashboard" },
+		          { href: "/admin/map", text: "Feature Map" },
 		          { href: "/admin/products", text: "Products" },
 		          { href: "/admin/preorders", text: "Preorders" },
+		          { href: "/admin/payment-methods", text: "Payment Methods" },
 		          { href: "/admin/pages", text: "Pages" },
 		          { href: "/admin/settings", text: "Settings" },	];
 
