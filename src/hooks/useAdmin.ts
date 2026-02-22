@@ -165,11 +165,12 @@ export const useCreatePaymentAccount = () => {
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(payload),
 			});
+			const data = await res.json().catch(() => ({ hasError: true, errorMessage: "Failed to create account" }));
 			if (!res.ok) {
-				const err = await res.json().catch(() => ({ error: "Failed to create account" }));
-				throw new Error(err.error || "Failed to create account");
+				throw new Error(data.errorMessage || data.error || "Failed to create account");
 			}
-			return res.json();
+			if (data.hasError) throw new Error(data.errorMessage || "Failed to create account");
+			return data.payload;
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["payment-accounts"] });
@@ -186,11 +187,12 @@ export const useUpdatePaymentAccount = () => {
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(payload),
 			});
+			const data = await res.json().catch(() => ({ hasError: true, errorMessage: "Failed to update account" }));
 			if (!res.ok) {
-				const err = await res.json().catch(() => ({ error: "Failed to update account" }));
-				throw new Error(err.error || "Failed to update account");
+				throw new Error(data.errorMessage || data.error || "Failed to update account");
 			}
-			return res.json();
+			if (data.hasError) throw new Error(data.errorMessage || "Failed to update account");
+			return data.payload;
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["payment-accounts"] });

@@ -4,7 +4,7 @@ import Loader from "@/components/ui/Loader";
 import { useAuth } from "@/contexts/auth-context";
 import { Item } from "@/types/types";
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useAdminCollections, useAdminProducts } from "@/hooks/useAdmin";
 import { Box, Card, Heading, Text, Button, Stack, Flex, Grid, Badge } from "@/components/ui/primitives";
 import { calculateSalePrice } from "@/lib/logic";
@@ -12,15 +12,57 @@ import { navigateWithLocale, normalizeLocale } from "@/lib/navigation";
 import { useLocale } from "next-intlayer";
 import { useRouter } from "next/navigation";
 
+const PAGE_SIZE = 12;
+type ProductSort = "latest" | "title_asc" | "price_asc" | "price_desc";
+
 export default function ProductsPage() {
 	const localeData = useLocale();
 	const locale = normalizeLocale(localeData);
 	const router = useRouter();
 	const { user, isLoading: isAuthLoading } = useAuth();
 	const [collectionName, setCollectionName] = useState("");
+	const [searchTerm, setSearchTerm] = useState("");
+	const [sortBy, setSortBy] = useState<ProductSort>("latest");
+	const [currentPage, setCurrentPage] = useState(1);
 
 	const { data: products = [] } = useAdminProducts(collectionName, !!user);
 	const { data: collections = [] } = useAdminCollections(!!user);
+
+	const filteredAndSortedProducts = useMemo(() => {
+		const normalizedSearch = searchTerm.trim().toLowerCase();
+		const filtered = normalizedSearch.length === 0
+			? products
+			: products.filter((product) =>
+				product.title.toLowerCase().includes(normalizedSearch) ||
+				(product.name || "").toLowerCase().includes(normalizedSearch),
+			);
+
+		const sorted = [...filtered];
+		switch (sortBy) {
+			case "title_asc":
+				sorted.sort((left, right) => left.title.localeCompare(right.title));
+				break;
+			case "price_asc":
+				sorted.sort((left, right) => left.price - right.price);
+				break;
+			case "price_desc":
+				sorted.sort((left, right) => right.price - left.price);
+				break;
+			case "latest":
+			default:
+				sorted.sort((left, right) => right.id - left.id);
+				break;
+		}
+
+		return sorted;
+	}, [products, searchTerm, sortBy]);
+
+	const totalPages = Math.max(1, Math.ceil(filteredAndSortedProducts.length / PAGE_SIZE));
+	const safeCurrentPage = Math.min(currentPage, totalPages);
+	const paginatedProducts = useMemo(() => {
+		const startIndex = (safeCurrentPage - 1) * PAGE_SIZE;
+		return filteredAndSortedProducts.slice(startIndex, startIndex + PAGE_SIZE);
+	}, [filteredAndSortedProducts, safeCurrentPage]);
 
 	if (isAuthLoading || !user) return <Loader />;
 
@@ -37,12 +79,27 @@ export default function ProductsPage() {
 				<Stack gap={6}>
 					<Box>
 						<Text weight="bold" size="lg" color="text-white" className="block mb-4">My Inventory</Text>
-						
-						<Stack gap={2}>
+						<Stack gap={4}>
+							<Stack gap={2}>
+								<label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Search</label>
+								<input
+									type="text"
+									placeholder="Search by product title or collection"
+									value={searchTerm}
+									onChange={({ target }) => {
+										setCurrentPage(1);
+										setSearchTerm(target.value);
+									}}
+									className="bg-white/5 border border-white/10 rounded-xl p-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#58a076]/50 w-full md:max-w-md"
+								/>
+							</Stack>
 							<label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Filter by collection</label>
 							<select
 								aria-label="Filter products by collection"
-								onChange={({ target }) => setCollectionName(target.value)}
+								onChange={({ target }) => {
+									setCurrentPage(1);
+									setCollectionName(target.value);
+								}}
 								value={collectionName}
 								className="bg-white/5 border border-white/10 rounded-xl p-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#58a076]/50 w-full max-w-xs"
 							>
@@ -53,19 +110,61 @@ export default function ProductsPage() {
 									</option>
 								))}
 							</select>
+								<Stack gap={2}>
+									<label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Sort by</label>
+									<select
+										aria-label="Sort products"
+										value={sortBy}
+										onChange={({ target }) => {
+											setCurrentPage(1);
+											setSortBy(target.value as ProductSort);
+										}}
+										className="bg-white/5 border border-white/10 rounded-xl p-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#58a076]/50 w-full max-w-xs"
+									>
+										<option value="latest" className="bg-[#0a2735]">Latest updated</option>
+										<option value="title_asc" className="bg-[#0a2735]">Title A-Z</option>
+										<option value="price_asc" className="bg-[#0a2735]">Price low-high</option>
+										<option value="price_desc" className="bg-[#0a2735]">Price high-low</option>
+									</select>
+								</Stack>
 						</Stack>
 					</Box>
 
-					{products.length === 0 ? (
+						{filteredAndSortedProducts.length === 0 ? (
 						<Box className="py-20 text-center">
-							<Text color="text-slate-500" italic>No products in inventory.</Text>
+								<Text color="text-slate-500" italic>No products matched your filters.</Text>
 						</Box>
 					) : (
-						<Grid cols={1} className="sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" gap={6}>
-							{products.map((product) => (
-								<ItemCard item={product} key={product.id} locale={locale} />
-							))}
-						</Grid>
+							<Stack gap={4}>
+								<Grid cols={1} className="sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" gap={6}>
+									{paginatedProducts.map((product) => (
+										<ItemCard item={product} key={product.id} locale={locale} />
+									))}
+								</Grid>
+								<Flex justifyContent="between" alignItems="center" className="pt-2">
+									<Text size="sm" color="text-slate-400">
+										Page {safeCurrentPage} of {totalPages}
+									</Text>
+									<Flex gap={2}>
+										<Button
+											variant="secondary"
+											size="sm"
+											disabled={safeCurrentPage <= 1}
+											onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+										>
+											Previous
+										</Button>
+										<Button
+											variant="secondary"
+											size="sm"
+											disabled={safeCurrentPage >= totalPages}
+											onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+										>
+											Next
+										</Button>
+									</Flex>
+								</Flex>
+							</Stack>
 					)}
 				</Stack>
 			</Card>
