@@ -120,7 +120,9 @@ export function AddProductForm() {
 										<label className="text-sm font-medium text-slate-400">{t.priceThb.value}</label>
 										<input 
 											type="number" 
-											{...form.register("price", { required: true, valueAsNumber: true })} 
+											min={0.01}
+											step={0.01}
+											{...form.register("price", { required: true, valueAsNumber: true, min: 0.01 })} 
 											className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#58a076]/50 transition-all" 
 										/>
 									</Stack>

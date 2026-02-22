@@ -90,7 +90,7 @@ export default function SetForm({ mode, initialSet }: SetFormProps) {
 		}));
 
 		if (!title.trim()) return toast.error(t.setTitleRequired.value);
-		if (price <= 0) return toast.error(t.setPriceRequired.value);
+		if (price < 0.01) return toast.error(t.setPriceRequired.value);
 		if (paymentAccountId <= 0) return toast.error(t.selectPaymentAccountRequired.value);
 		if (items.length === 0) return toast.error(t.selectProductRequired.value);
 
@@ -227,6 +227,8 @@ export default function SetForm({ mode, initialSet }: SetFormProps) {
 								<Input
 									id="set-price"
 									type="number"
+									min={0.01}
+									step={0.01}
 									value={price}
 									onChange={(event) => setPrice(Number(event.target.value || 0))}
 									className="mt-1"
