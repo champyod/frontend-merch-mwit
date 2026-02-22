@@ -383,6 +383,18 @@ export const useDisableSet = () => {
 	});
 };
 
+export const useRestoreSet = () => {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: async (id: number) => {
+			const res = await fetch(`${API_BASE_URL}/admin/sets/${id}/restore`, { method: "PUT" });
+			if (!res.ok) throw new Error("Failed to restore set");
+			return res.json();
+		},
+		onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-sets"] }),
+	});
+};
+
 const fetchAdminProductsForSet = async (): Promise<Item[]> => {
 	const res = await fetch(`${API_BASE_URL}/admin/products`);
 	if (!res.ok) throw new Error("Failed to fetch products for set");
@@ -415,6 +427,23 @@ export const useAdminProducts = (collectionName?: string, enabled: boolean = tru
 		queryKey: ["admin-products", collectionName || ""],
 		queryFn: () => fetchAdminProducts(collectionName),
 		enabled,
+	});
+};
+
+export const useBulkUpdateProducts = () => {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: async ({ ids, action }: { ids: number[]; action: "hide" | "show" | "disable" | "enable" | "restore" }) => {
+			const res = await fetch(`${API_BASE_URL}/admin/products/bulk`, {
+				method: "PUT",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ ids, action }),
+			});
+			const data = await res.json().catch(() => ({ hasError: true, errorMessage: "Bulk update failed" }));
+			if (!res.ok || data.hasError) throw new Error(data.errorMessage || "Bulk update failed");
+			return data.payload;
+		},
+		onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-products"] }),
 	});
 };
 

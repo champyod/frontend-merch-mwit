@@ -5,7 +5,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useLocale } from "next-intlayer";
 import { normalizeLocale } from "@/lib/navigation";
-import { useAdminSets, useDisableSet } from "@/hooks/useAdmin";
+import { useAdminSets, useDisableSet, useRestoreSet } from "@/hooks/useAdmin";
 import { AdminSetStatusFilter, getAdminSetImage, getAdminSetStateLabels } from "@/lib/adminSets";
 import { Badge, Box, Button, Card, Flex, Grid, Heading, Input, Stack, Text } from "@/components/ui/primitives";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -18,6 +18,7 @@ export default function AdminSetsPageContent() {
 	const [status, setStatus] = useState<AdminSetStatusFilter>("");
 	const { data: sets = [], isLoading } = useAdminSets(search, status);
 	const disableSetMutation = useDisableSet();
+	const restoreSetMutation = useRestoreSet();
 
 	const onDisableSet = async (setId: number) => {
 		if (!confirm("Disable this set?")) return;
@@ -26,6 +27,15 @@ export default function AdminSetsPageContent() {
 			toast.success("Set disabled");
 		} catch {
 			toast.error("Disable failed");
+		}
+	};
+
+	const onRestoreSet = async (setId: number) => {
+		try {
+			await restoreSetMutation.mutateAsync(setId);
+			toast.success("Set restored");
+		} catch {
+			toast.error("Restore failed");
 		}
 	};
 
@@ -107,9 +117,15 @@ export default function AdminSetsPageContent() {
 											<Link href={`/${locale}/admin/sets/edit/${setItem.id}`}>
 												<Button variant="secondary" size="sm">Edit</Button>
 											</Link>
-											<Button type="button" variant="danger" size="sm" onClick={() => onDisableSet(setItem.id)}>
-												Disable
-											</Button>
+											{setItem.enabled === 1 ? (
+												<Button type="button" variant="danger" size="sm" onClick={() => onDisableSet(setItem.id)}>
+													Disable
+												</Button>
+											) : (
+												<Button type="button" variant="secondary" size="sm" onClick={() => onRestoreSet(setItem.id)}>
+													Restore
+												</Button>
+											)}
 										</Flex>
 									</Stack>
 								</Flex>

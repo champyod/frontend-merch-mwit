@@ -5,12 +5,13 @@ import { useAuth } from "@/contexts/auth-context";
 import { Item } from "@/types/types";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { useAdminCollections, useAdminProducts } from "@/hooks/useAdmin";
+import { useAdminCollections, useAdminProducts, useBulkUpdateProducts } from "@/hooks/useAdmin";
 import { Box, Card, Heading, Text, Button, Stack, Flex, Grid, Badge } from "@/components/ui/primitives";
 import { calculateSalePrice } from "@/lib/logic";
 import { navigateWithLocale, normalizeLocale } from "@/lib/navigation";
 import { useLocale } from "next-intlayer";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const PAGE_SIZE = 12;
 type ProductSort = "latest" | "title_asc" | "price_asc" | "price_desc";
@@ -24,9 +25,11 @@ export default function ProductsPage() {
 	const [searchTerm, setSearchTerm] = useState("");
 	const [sortBy, setSortBy] = useState<ProductSort>("latest");
 	const [currentPage, setCurrentPage] = useState(1);
+	const [selectedProductIds, setSelectedProductIds] = useState<number[]>([]);
 
 	const { data: products = [] } = useAdminProducts(collectionName, !!user);
 	const { data: collections = [] } = useAdminCollections(!!user);
+	const bulkUpdateProducts = useBulkUpdateProducts();
 
 	const filteredAndSortedProducts = useMemo(() => {
 		const normalizedSearch = searchTerm.trim().toLowerCase();
@@ -64,6 +67,27 @@ export default function ProductsPage() {
 		return filteredAndSortedProducts.slice(startIndex, startIndex + PAGE_SIZE);
 	}, [filteredAndSortedProducts, safeCurrentPage]);
 
+	const toggleSelectProduct = (productId: number) => {
+		setSelectedProductIds((prev) =>
+			prev.includes(productId) ? prev.filter((id) => id !== productId) : [...prev, productId],
+		);
+	};
+
+	const runBulkAction = async (action: "hide" | "show" | "disable" | "restore") => {
+		if (selectedProductIds.length === 0) {
+			toast.error("Select at least one product");
+			return;
+		}
+
+		try {
+			await bulkUpdateProducts.mutateAsync({ ids: selectedProductIds, action });
+			toast.success("Bulk action applied");
+			setSelectedProductIds([]);
+		} catch (error) {
+			toast.error(error instanceof Error ? error.message : "Bulk action failed");
+		}
+	};
+
 	if (isAuthLoading || !user) return <Loader />;
 
 	return (
@@ -77,6 +101,18 @@ export default function ProductsPage() {
 
 			<Card variant="glass" className="p-6">
 				<Stack gap={6}>
+					<Flex justifyContent="between" alignItems="center" className="gap-3 flex-wrap">
+						<Text size="sm" color="text-slate-400">
+							Selected {selectedProductIds.length} item(s)
+						</Text>
+						<Flex gap={2} wrap="wrap">
+							<Button variant="secondary" size="sm" onClick={() => runBulkAction("hide")} disabled={bulkUpdateProducts.isPending || selectedProductIds.length === 0}>Bulk Hide</Button>
+							<Button variant="secondary" size="sm" onClick={() => runBulkAction("show")} disabled={bulkUpdateProducts.isPending || selectedProductIds.length === 0}>Bulk Show</Button>
+							<Button variant="secondary" size="sm" onClick={() => runBulkAction("disable")} disabled={bulkUpdateProducts.isPending || selectedProductIds.length === 0}>Bulk Disable</Button>
+							<Button variant="secondary" size="sm" onClick={() => runBulkAction("restore")} disabled={bulkUpdateProducts.isPending || selectedProductIds.length === 0}>Bulk Restore</Button>
+						</Flex>
+					</Flex>
+
 					<Box>
 						<Text weight="bold" size="lg" color="text-white" className="block mb-4">My Inventory</Text>
 						<Stack gap={4}>
@@ -138,7 +174,13 @@ export default function ProductsPage() {
 							<Stack gap={4}>
 								<Grid cols={1} className="sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" gap={6}>
 									{paginatedProducts.map((product) => (
-										<ItemCard item={product} key={product.id} locale={locale} />
+										<ItemCard
+											item={product}
+											key={product.id}
+											locale={locale}
+											isSelected={selectedProductIds.includes(product.id)}
+											onToggleSelect={toggleSelectProduct}
+										/>
 									))}
 								</Grid>
 								<Flex justifyContent="between" alignItems="center" className="pt-2">
@@ -172,7 +214,17 @@ export default function ProductsPage() {
 	);
 }
 
-function ItemCard({ item, locale }: { item: Item; locale: "th" | "en" }) {
+function ItemCard({
+	item,
+	locale,
+	isSelected,
+	onToggleSelect,
+}: {
+	item: Item;
+	locale: "th" | "en";
+	isSelected: boolean;
+	onToggleSelect: (productId: number) => void;
+}) {
 	const {
 		id,
 		title,
@@ -191,7 +243,15 @@ function ItemCard({ item, locale }: { item: Item; locale: "th" | "en" }) {
 	const salePrice = calculateSalePrice(item);
 
 	return (
-		<Link href={href} className="group">
+		<div className="group relative">
+			<input
+				type="checkbox"
+				title="Select product"
+				checked={isSelected}
+				onChange={() => onToggleSelect(id)}
+				className="absolute top-3 left-3 z-10 w-4 h-4 rounded border-white/30 bg-[#0a2735]/70"
+			/>
+			<Link href={href} className="block">
 			<Card 
 				variant="outline" 
 				className={`p-4 h-full transition-all hover:border-[#58a076]/50 hover:bg-white/5 ${hidden === 1 ? "opacity-50" : ""}`}
@@ -234,6 +294,7 @@ function ItemCard({ item, locale }: { item: Item; locale: "th" | "en" }) {
 					</Box>
 				</Stack>
 			</Card>
-		</Link>
+			</Link>
+		</div>
 	);
 }
