@@ -7,6 +7,8 @@ import Link from "next/link";
 import { useAdminOverview } from "@/hooks/useAdmin";
 import { useLocale } from "next-intlayer";
 import { normalizeLocale } from "@/lib/navigation";
+import { Box, Card, Stack, Text } from "@/components/ui/primitives";
+import { ChevronRight } from "lucide-react";
 
 const toISODate = (date: Date): string => date.toISOString().slice(0, 10);
 
@@ -49,6 +51,16 @@ export default function DashboardPage() {
 		},
 		!!user && !isLoading,
 	);
+
+	const quickActions = [
+		{ href: `/${locale}/admin/pages`, prefix: "Edit my", emphasis: "pages", suffix: "." },
+		{ href: `/${locale}/admin/products`, prefix: "Add/Edit my", emphasis: "products", suffix: "." },
+		{ href: `/${locale}/admin/sets`, prefix: "Create/Edit", emphasis: "sets", suffix: "." },
+		{ href: `/${locale}/admin/preorders`, prefix: "Check customers'", emphasis: "preorders", suffix: "." },
+		{ href: `/${locale}/admin/payments`, prefix: "Manage", emphasis: "payment accounts", suffix: "." },
+		{ href: `/${locale}/admin/users`, prefix: "View registered", emphasis: "users", suffix: "." },
+		{ href: `/${locale}/admin/settings`, prefix: "Check on my site", emphasis: "settings", suffix: "." },
+	];
 
 	if (isLoading || !user) return <Loader />;
 
@@ -146,127 +158,29 @@ export default function DashboardPage() {
 					)}
 				</div>
 			</div>
-			<h3 className="text-xl pt-10 pb-5 font-bold">
-				What&apos;d you like to do today?
-			</h3>
-
-			<Link
-				className="border-2 border-black bg-white p-2 w-full rounded-lg text-lg hover:drop-shadow-lg flex items-center justify-between"
-				href={`/${locale}/admin/pages`}
-			>
-				<span>
-					Edit my <b>pages</b>.
-				</span>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					width="24"
-					height="24"
-					viewBox="0 0 1024 1024"
-				>
-					<path
-						fill="currentColor"
-						d="M754.752 480H160a32 32 0 1 0 0 64h594.752L521.344 777.344a32 32 0 0 0 45.312 45.312l288-288a32 32 0 0 0 0-45.312l-288-288a32 32 0 1 0-45.312 45.312z"
-					/>
-				</svg>
-			</Link>
-			<Link
-				className="border-2 border-black bg-white p-2 w-full rounded-lg mt-5 text-lg hover:drop-shadow-lg flex items-center justify-between"
-				href={`/${locale}/admin/products`}
-			>
-				<span>
-					Add/Edit my <b>products</b>.
-				</span>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					width="24"
-					height="24"
-					viewBox="0 0 1024 1024"
-				>
-					<path
-						fill="currentColor"
-						d="M754.752 480H160a32 32 0 1 0 0 64h594.752L521.344 777.344a32 32 0 0 0 45.312 45.312l288-288a32 32 0 0 0 0-45.312l-288-288a32 32 0 1 0-45.312 45.312z"
-					/>
-				</svg>
-			</Link>
-			<Link
-				className="border-2 border-black bg-white p-2 w-full rounded-lg mt-5 text-lg hover:drop-shadow-lg flex items-center justify-between"
-				href={`/${locale}/admin/sets`}
-			>
-				<span>
-					Create/Edit <b>sets</b>.
-				</span>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					width="24"
-					height="24"
-					viewBox="0 0 1024 1024"
-				>
-					<path
-						fill="currentColor"
-						d="M754.752 480H160a32 32 0 1 0 0 64h594.752L521.344 777.344a32 32 0 0 0 45.312 45.312l288-288a32 32 0 0 0 0-45.312l-288-288a32 32 0 1 0-45.312 45.312z"
-					/>
-				</svg>
-			</Link>
-			<Link
-				className="border-2 border-black bg-white p-2 w-full rounded-lg mt-5 text-lg hover:drop-shadow-lg flex items-center justify-between"
-				href={`/${locale}/admin/preorders`}
-			>
-				<span>
-					Check customers&apos; <b>preorders</b>.
-				</span>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					width="24"
-					height="24"
-					viewBox="0 0 1024 1024"
-				>
-					<path
-						fill="currentColor"
-						d="M754.752 480H160a32 32 0 1 0 0 64h594.752L521.344 777.344a32 32 0 0 0 45.312 45.312l288-288a32 32 0 0 0 0-45.312l-288-288a32 32 0 1 0-45.312 45.312z"
-					/>
-				</svg>
-			</Link>
-			<Link
-				className="border-2 border-black bg-white p-2 w-full rounded-lg mt-5 text-lg hover:drop-shadow-lg flex items-center justify-between"
-				href={`/${locale}/admin/payments`}
-			>
-				<span>
-					Manage <b>payment accounts</b>.
-				</span>
-				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 1024 1024">
-					<path fill="currentColor" d="M754.752 480H160a32 32 0 1 0 0 64h594.752L521.344 777.344a32 32 0 0 0 45.312 45.312l288-288a32 32 0 0 0 0-45.312l-288-288a32 32 0 1 0-45.312 45.312z" />
-				</svg>
-			</Link>
-			<Link
-				className="border-2 border-black bg-white p-2 w-full rounded-lg mt-5 text-lg hover:drop-shadow-lg flex items-center justify-between"
-				href={`/${locale}/admin/users`}
-			>
-				<span>
-					View registered <b>users</b>.
-				</span>
-				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 1024 1024">
-					<path fill="currentColor" d="M754.752 480H160a32 32 0 1 0 0 64h594.752L521.344 777.344a32 32 0 0 0 45.312 45.312l288-288a32 32 0 0 0 0-45.312l-288-288a32 32 0 1 0-45.312 45.312z" />
-				</svg>
-			</Link>
-			<Link
-				className="border-2 border-black bg-white p-2 w-full rounded-lg mt-5 text-lg hover:drop-shadow-lg flex items-center justify-between"
-				href={`/${locale}/admin/settings`}
-			>
-				<span>
-					Check on my site <b>settings</b>.
-				</span>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					width="24"
-					height="24"
-					viewBox="0 0 1024 1024"
-				>
-					<path
-						fill="currentColor"
-						d="M754.752 480H160a32 32 0 1 0 0 64h594.752L521.344 777.344a32 32 0 0 0 45.312 45.312l288-288a32 32 0 0 0 0-45.312l-288-288a32 32 0 1 0-45.312 45.312z"
-					/>
-				</svg>
-			</Link>
+			<Card variant="glass" className="mt-10 p-5 rounded-2xl">
+				<Text size="xl" weight="bold" color="text-white" className="mb-4">
+					What&apos;d you like to do today?
+				</Text>
+				<Stack gap={3}>
+					{quickActions.map((action) => (
+						<Link key={action.href} href={action.href} className="block">
+							<Card
+								variant="outline"
+								className="rounded-xl px-4 py-3 hover:bg-white/5 transition-all"
+							>
+								<Box className="flex items-center justify-between">
+									<Text size="lg" weight="medium" color="text-white/90">
+										{action.prefix} <b>{action.emphasis}</b>
+										{action.suffix}
+									</Text>
+									<ChevronRight className="w-5 h-5 text-white/60" />
+								</Box>
+							</Card>
+						</Link>
+					))}
+				</Stack>
+			</Card>
 		</>
 	);
 }

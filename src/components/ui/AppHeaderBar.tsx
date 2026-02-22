@@ -130,7 +130,7 @@ export default function AppHeaderBar() {
 				className={`container mx-auto px-4 md:px-6 flex h-16 items-center justify-between relative`}
 			>
 				<Link href={`/${locale}/admin`} className="transition-transform hover:scale-105 active:scale-95 z-10">
-					<Logo />
+					<Logo variant="long" />
 				</Link>
 
 				<Box className="hidden md:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">

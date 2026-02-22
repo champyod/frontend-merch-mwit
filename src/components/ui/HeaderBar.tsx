@@ -158,7 +158,7 @@ export default function HeaderBar() {
 		>
 			<Container as="nav" maxWidth="full" className="px-4 md:px-6 flex items-center justify-between relative">
 				<Link href={buildLocalePath(locale, "/")} className="transition-transform duration-300 hover:scale-105 active:scale-95 z-10">
-					<Logo />
+					<Logo variant="long" />
 				</Link>
 
 				<Box className="hidden md:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">

@@ -8,6 +8,7 @@ import { ShoppingBag, LogOut, LayoutDashboard, ChevronDown } from "lucide-react"
 import Image from "next/image";
 import { useLocale } from "next-intlayer";
 import { buildLocalePath, normalizeLocale } from "@/lib/navigation";
+import { Button } from "./primitives";
 
 export default function UserMenu() {
 	const { user, logout } = useAuth();
@@ -69,10 +70,12 @@ export default function UserMenu() {
 								<Link
 									href={buildLocalePath(locale, "/admin")}
 									onClick={() => setIsOpen(false)}
-									className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-white/70 hover:text-white hover:bg-white/5 transition-all"
+									className="block w-full"
 								>
-									<LayoutDashboard className="w-4 h-4 text-[#58a076]" />
-									Admin Dashboard
+									<Button variant="secondary" size="md" className="w-full justify-start text-white">
+										<LayoutDashboard className="w-4 h-4 text-[#58a076]" />
+										/admin
+									</Button>
 								</Link>
 							)}
 

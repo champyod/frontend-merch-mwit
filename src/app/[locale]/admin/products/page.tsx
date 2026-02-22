@@ -8,12 +8,14 @@ import { useState } from "react";
 import { useAdminCollections, useAdminProducts } from "@/hooks/useAdmin";
 import { Box, Card, Heading, Text, Button, Stack, Flex, Grid, Badge } from "@/components/ui/primitives";
 import { calculateSalePrice } from "@/lib/logic";
-import { normalizeLocale } from "@/lib/navigation";
+import { navigateWithLocale, normalizeLocale } from "@/lib/navigation";
 import { useLocale } from "next-intlayer";
+import { useRouter } from "next/navigation";
 
 export default function ProductsPage() {
 	const localeData = useLocale();
 	const locale = normalizeLocale(localeData);
+	const router = useRouter();
 	const { user, isLoading: isAuthLoading } = useAuth();
 	const [collectionName, setCollectionName] = useState("");
 
@@ -26,9 +28,9 @@ export default function ProductsPage() {
 		<Box className="pb-20">
 			<Flex justifyContent="between" alignItems="center" className="mb-8">
 				<Heading level={1} size="3xl" color="text-white">Products</Heading>
-				<Link href={`/${locale}/admin/products/add`}>
-					<Button variant="primary" size="md">+ Add Product</Button>
-				</Link>
+				<Button variant="primary" size="md" onClick={() => navigateWithLocale(router, locale, "/admin/products/add")}>
+					+ Add Product
+				</Button>
 			</Flex>
 
 			<Card variant="glass" className="p-6">
