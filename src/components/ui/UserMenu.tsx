@@ -65,7 +65,7 @@ export default function UserMenu() {
 								My Orders
 							</Link>
 
-							{user.role === "admin" && (
+							{user.role === "super-admin" && (
 								<Link
 									href={buildLocalePath(locale, "/admin")}
 									onClick={() => setIsOpen(false)}

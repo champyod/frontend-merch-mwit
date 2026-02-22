@@ -36,12 +36,12 @@ export default function AdminRootLayout({
 	);
 
 	useEffect(() => {
-		if (!isLoading && (!user || user.role !== "admin")) {
+		if (!isLoading && (!user || user.role !== "super-admin")) {
 			navigateWithLocale(router, locale, "/", true);
 		}
 	}, [user, isLoading, router, locale]);
 
-	if (isLoading || !user || user.role !== "admin") return <Loader />;
+	if (isLoading || !user || user.role !== "super-admin") return <Loader />;
 
 	return (
 		<QueryClientProvider client={queryClient}>

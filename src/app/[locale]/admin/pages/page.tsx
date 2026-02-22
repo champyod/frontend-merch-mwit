@@ -42,7 +42,7 @@ export default function Pages() {
 	useEffect(
 		function updateMenuOrder() {
 			if (isTriggeredSaveOrder)
-				fetch(`${API_BASE_URL}/page`, {
+				fetch(`${API_BASE_URL}/admin/pages/order`, {
 					method: "PUT",
 					headers: {
 						"Content-Type": "application/json",

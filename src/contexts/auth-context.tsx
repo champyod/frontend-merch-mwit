@@ -93,7 +93,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 		// Case 2: Logged in user on login page -> redirect to dashboard/admin
 		if (user && isLoginPage) {
-			if (user.role === "admin") {
+			if (user.role === "super-admin") {
 				navigateWithLocale(router, locale, "/admin", true);
 			} else {
 				navigateWithLocale(router, locale, "/", true);

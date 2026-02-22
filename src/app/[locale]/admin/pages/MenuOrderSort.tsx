@@ -18,6 +18,7 @@ import {
 import { toast } from "sonner";
 import { EditPage } from "./EditPage";
 import { useState } from "react";
+import { API_BASE_URL } from "@/lib/env";
 
 export function MenuOrderSort({
 	menuItems,
@@ -74,7 +75,7 @@ function SortableItem({
 	const onDelete = async (id: MenuItem["ID"]) => {
 		try {
 			if (!confirm("Are you sure you want to delete this page?")) return;
-			const res = await fetch(`/api/page/${id}`, {
+			const res = await fetch(`${API_BASE_URL}/admin/pages/${id}`, {
 				method: "DELETE",
 			});
 			const data = await res.json();

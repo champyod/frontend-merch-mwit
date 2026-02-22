@@ -95,7 +95,7 @@ const MenuSidebar = ({
 									{t.myOrders.value}
 								</Button>
 							</Link>
-							{user.role === "admin" && (
+							{user.role === "super-admin" && (
 															<Link href={buildLocalePath(locale, "/admin")} onClick={toggleMenu} className="w-full">
 																<Button variant="primary" size="lg" className="w-full gap-2 justify-start">
 																	<LayoutDashboard className="w-5 h-5" />
@@ -178,7 +178,7 @@ export default function HeaderBar() {
 								</Link>
 							);
 						})}
-						{user?.role === "admin" && <AdminDropdown />}
+						{user?.role === "super-admin" && <AdminDropdown />}
 						{navLinks && navLinks.slice(0, 5).map((item, index) => (
 							<NavLink
 								key={index}

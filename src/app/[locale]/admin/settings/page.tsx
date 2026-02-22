@@ -16,7 +16,7 @@ export default function SettingsPage() {
 
 	const { data } = useQuery<any, any, GetSiteResponse, any>({
 		queryKey: ["site"],
-		queryFn: async () => await (await fetch(`${API_BASE_URL}/site`)).json(),
+		queryFn: async () => await (await fetch(`${API_BASE_URL}/admin/site`)).json(),
 	});
 
 	const [imageUrl, setImageUrl] = useState("");
@@ -39,8 +39,8 @@ export default function SettingsPage() {
 			if (imageUrl.length !== 0) new URL(imageUrl);
 
 			const response = await (
-				await fetch(`${API_BASE_URL}/site`, {
-					method: "PUT",
+				await fetch(`${API_BASE_URL}/admin/site`, {
+					method: "POST",
 					headers: {
 						"Content-Type": "application/json",
 					},

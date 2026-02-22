@@ -4,6 +4,7 @@ import { MenuItem } from "@/types/types";
 import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { API_BASE_URL } from "@/lib/env";
 
 interface IFormInputs {
 	slug: string;
@@ -36,7 +37,7 @@ export function AddPage({ addPage }: { addPage: (newPage: MenuItem) => void }) {
 			event?.preventDefault();
 			formData.slug = formatInput(formData.slug);
 			setValue("slug", formData.slug);
-			let res = await fetch(`/api/page`, {
+			let res = await fetch(`${API_BASE_URL}/admin/pages`, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
